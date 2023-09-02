@@ -1,1 +1,7 @@
 <p>transaction-detail works!</p>
+<p>Title: {{ response.title }}</p>
+<p>amount: {{ response.amount | currency }}</p>
+<p>datetime: {{ response.timeOfTransaction }}</p>
+<p>Description: {{ response.description }}</p>
+<li style="color: blue;" [routerLink]="['..',nextId]" >next</li>
+<li style="color: blue;" [routerLink]="['..',prevId]" >previous</li>

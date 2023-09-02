@@ -18,7 +18,9 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     FormsModule,
     RouterModule.forChild([
-      {path:"transaction/register" , component: RegisterTransactionComponent}
+      {path:"transaction/register" , component: RegisterTransactionComponent},
+      {path:"transaction/view/:id" , component: TransactionDetailComponent},
+      {path:"transaction/view/:queryId/:id" , component: TransactionDetailComponent}
     ])
   ]
 })
