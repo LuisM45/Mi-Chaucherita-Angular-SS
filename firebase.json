@@ -1,0 +1,9 @@
+{
+  "hosting": [
+    {
+      "target": "Mi-Chaucherita-Angular",
+      "source": ".",
+      "frameworksBackend": {}
+    }
+  ]
+}

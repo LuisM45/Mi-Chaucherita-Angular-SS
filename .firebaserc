@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "advanced-web-apps-ea027": {
+      "hosting": {
+        "Mi-Chaucherita-Angular": [
+          "advanced-web-apps-ea027"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "advanced-web-apps-ea027"
+  }
+}

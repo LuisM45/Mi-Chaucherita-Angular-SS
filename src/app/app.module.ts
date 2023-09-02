@@ -4,12 +4,20 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ToolbarComponent } from './shared/toolbar/toolbar.component';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { AuthModule } from './auth/auth.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { environment } from '../environments/environment';
 import { AngularFireModule } from '@angular/fire/compat';
-import { environment } from 'src/enviroment/environment';
-import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+
+// import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+// import { getAuth, provideAuth } from '@angular/fire/auth';
+// import { getFirestore } from 'firebase/firestore';
+// import { provideFirestore } from '@angular/fire/firestore';
+
 
 @NgModule({
   declarations: [
@@ -21,12 +29,14 @@ import { AngularFireAuthModule } from '@angular/fire/compat/auth';
     BrowserModule,
     AppRoutingModule,
     AuthModule,
-    AngularFireModule.initializeApp(environment.firebaseConfig),
-    AngularFireAuthModule,
+    TransactionsModule,
     RouterModule.forRoot([
       {path: '', redirectTo:'/login', pathMatch:'full'},
       {path: '**', component:NotFoundComponent}
-    ])
+    ]),
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFireDatabaseModule,
+    AngularFirestoreModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
