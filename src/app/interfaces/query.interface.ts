@@ -1,7 +1,8 @@
+import { Query, QueryConstraint } from "firebase/firestore";
 
-export interface Query<E>{
+export interface PagedQuery<E>{
     id: string,
-    previousId?: string | null,
-    nextId?: string | null,
+    nextPage?: ()=>Promise<PagedQuery<E>>,
+    prevPage?: ()=>Promise<PagedQuery<E>>,
     result: E[]
 }

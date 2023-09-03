@@ -1,7 +1,11 @@
 <p>transaction-detail works!</p>
-<p>Title: {{ response.title }}</p>
-<p>amount: {{ response.amount | currency }}</p>
-<p>datetime: {{ response.timeOfTransaction }}</p>
-<p>Description: {{ response.description }}</p>
-<li style="color: blue;" [routerLink]="['..',nextId]" >next</li>
-<li style="color: blue;" [routerLink]="['..',prevId]" >previous</li>
+<p>Title: {{ transaction.title }}</p>
+<p>amount: {{ transaction.amount | currency }}</p>
+<p>datetime: {{ transaction.timeOfTransaction }}</p>
+<p>Description: {{ transaction.description }}</p>
+<ng-container *ngIf="hasNext">
+    <li style="color: blue;" (click)="navigateNext()" >next</li>
+</ng-container>
+<ng-container *ngIf="hasPrev">
+    <li style="color: blue;" (click)="navigatePrevious()" >previous</li>
+</ng-container>
