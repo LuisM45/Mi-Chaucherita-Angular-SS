@@ -218,23 +218,26 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
   })}
 
   getEarnings(queryTransaction: PagedQuery<Transaction>): number{
+    if(queryTransaction.result.length==0) return 0
     return queryTransaction.result
       .map(t=>t.amount)
       .filter(a=>a>0)
-      .reduce((p,c)=>p+c)
+      .reduce((p,c)=>p+c,0)
   }
 
   getSpendings(queryTransaction: PagedQuery<Transaction>): number{
+    if(queryTransaction.result.length==0) return 0
     return queryTransaction.result
     .map(t=>t.amount)
     .filter(a=>a<0)
-    .reduce((p,c)=>p+c)
+    .reduce((p,c)=>p+c,0)
   }
 
   getBalance(queryTransaction: PagedQuery<Transaction>): number{
+    if(queryTransaction.result.length==0) return 0
     return queryTransaction.result
       .map(t=>t.amount)
-      .reduce((p,c)=>p+c)
+      .reduce((p,c)=>p+c,0)
   }
 
 }

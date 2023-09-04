@@ -14,9 +14,9 @@ import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-// import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore } from 'firebase/firestore';
 import { provideFirestore } from '@angular/fire/firestore';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 
 @NgModule({
@@ -30,6 +30,7 @@ import { provideFirestore } from '@angular/fire/firestore';
     AppRoutingModule,
     AuthModule,
     TransactionsModule,
+    DashboardModule,
     RouterModule.forRoot([
       {path: '', redirectTo:'/login', pathMatch:'full'},
       {path: '**', component:NotFoundComponent}

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
 import { TransactionsService } from 'src/app/shared/transactions.service';
 import { dateStringToDate, toLocalStringUpToMinute } from 'src/app/shared/utils';
@@ -15,7 +16,8 @@ export class RegisterTransactionComponent {
   description: string = ""
 
   constructor(
-    public transactionService: TransactionsService
+    public transactionService: TransactionsService,
+    public router:Router
   ){
 
     console.log(this.datetime)
@@ -31,7 +33,7 @@ export class RegisterTransactionComponent {
 
     this.transactionService.registerTransaction(
       transaction 
-    )
+    ).then(a=>{this.router.navigate(['dashboard'])})
    console.log(transaction) 
   }
   

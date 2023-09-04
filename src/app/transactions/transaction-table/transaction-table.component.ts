@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { QueryConstraint } from 'firebase/firestore';
 import { PagedQuery } from 'src/app/interfaces/query.interface';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
 import { TransactionsService } from 'src/app/shared/transactions.service';
@@ -10,6 +11,7 @@ import { TransactionsService } from 'src/app/shared/transactions.service';
 })
 export class TransactionTableComponent {
 
+  queryConstraints:QueryConstraint[] = []
   response: PagedQuery<Transaction> = {
     id: '',
     result: []
@@ -17,7 +19,7 @@ export class TransactionTableComponent {
   constructor(
     private transactionService: TransactionsService
   ){
-    transactionService.getTransactionList().then(tl=>{
+    transactionService.getTransactionList1([]).then(tl=>{
       console.log("svc response")
       console.log(tl)
       this.response = tl
@@ -38,6 +40,10 @@ export class TransactionTableComponent {
 
   touchTitle() {
     throw new Error('Method not implemented.');
+  }
+
+  reload(){
+
   }
 
   navigatePrevious() {

@@ -22,6 +22,10 @@ import { FormsModule } from '@angular/forms';
       {path:"transaction/view/:id" , component: TransactionDetailComponent},
       {path:"transaction/table" , component: TransactionTableComponent},
     ])
+  ],
+  exports:[
+    TransactionDetailComponent,
+    TransactionTableComponent
   ]
 })
 export class TransactionsModule { }
