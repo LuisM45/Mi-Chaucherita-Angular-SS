@@ -20,6 +20,7 @@ import { FormsModule } from '@angular/forms';
     RouterModule.forChild([
       {path:"transaction/register" , component: RegisterTransactionComponent},
       {path:"transaction/view/:id" , component: TransactionDetailComponent},
+      {path:"transaction/table" , component: TransactionTableComponent},
     ])
   ]
 })

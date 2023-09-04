@@ -31,9 +31,10 @@ export class TransactionDetailComponent {
     private route: ActivatedRoute,
     private transactions: TransactionsService
   ){
-      
+      console.log("ctor")
       route.paramMap.subscribe(i=>{
-        getQueryConstraints(route).then(c=>{
+      console.log("subs")
+      getQueryConstraints(route).then(c=>{
           this.loadTransactionData(i.get('id')!!,c)
         })
       

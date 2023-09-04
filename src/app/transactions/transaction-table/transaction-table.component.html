@@ -1,1 +1,21 @@
 <p>transaction-table works!</p>
+<table>
+    <thead>
+        <tr>
+            <th (click)="touchTitle()">Title</th>
+            <th (click)="touchAmount()">Amount</th>
+            <th (click)="touchDatetime()">Datetime</th>
+            <th (click)="touchDescription()">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let t of response.result">
+            <td>{{ t.title }}</td>
+            <td>{{ t.amount }}</td>
+            <td>{{ t.timeOfTransaction }}</td>
+            <td>{{ t.description }}</td>
+        </tr>
+    </tbody>
+</table>
+<li style="color: blue;" (click)="navigateNext()" >next</li>
+<li style="color: blue;" (click)="navigatePrevious()" >previous</li>

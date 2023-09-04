@@ -6,6 +6,8 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { UserService } from './user.service';
 import { DocumentReference, DocumentSnapshot, QueryConstraint, collection, doc, endBefore, getDoc, getDocs, limit, limitToLast, orderBy, query, startAfter, startAt } from 'firebase/firestore';
 
+
+const PAGE_SIZE = 3
 @Injectable({
   providedIn: 'root'
 })
@@ -95,74 +97,112 @@ private lambdaPrevTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryCo
     })
   })
 }
-// getNextTransaction(snapshot,queryConstraints:QueryConstraint[]):PagedQuery<Transaction>{}
-// getPreviousTransaction(snapshot,queryConstraints:QueryConstraint[]):PagedQuery<Transaction>{}
 
-// getTransactions(queryConstraints:QueryConstraint[]):PagedQuery<Transaction>{}
+getTransactionList():Promise<PagedQuery<Transaction>>{
+  console.log("getTransactionList")
+  return this.getTransactionList1([orderBy("timeOfTransaction","asc"),limit(PAGE_SIZE)])
+}
 
+getTransactionList1a(startId:string,endId:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
+  console.log("getTransaction1a")
+  if(this.userService.currentUser?.uid==null) return Promise.reject()
+  const uid = this.userService.currentUser.uid!!
+  var docStart = doc(this.firestoreNew,`transactions`,uid,'transactions',startId)
+  var docEnd = doc(this.firestoreNew,`transactions`,uid,'transactions',endId)
 
-  // getTransaction(id:string): Promise<PagedQuery<Transaction>>{
-  //   if(this.userService.currentUser?.uid==null) return Promise.reject()
-  //   const uid = this.userService.currentUser.uid!!
+  return new Promise((resolve,reject)=>{
+    getDoc(docStart).then(snapStart =>{
+      getDoc(docEnd).then(snapEnd=>{
+      this.getTransactionList2(snapStart,snapEnd,queryConstraints).then(r=>resolve(r))
+        .catch(e=>reject(e))
+      }).catch(e=>reject(e))}).catch(e=>reject(e))
+  })
+  
+}
 
-  //   var result:PagedQuery<Transaction> = {
-  //     id: '',
-  //     result: []
-  //   }
+getTransactionList1(queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
+  console.log("getTransactionList1")
+  if(this.userService.currentUser?.uid==null) return Promise.reject()
+  const uid = this.userService.currentUser.uid!!
+  var col = collection(this.firestoreNew,`transactions`,uid,'transactions')
+  var q = query(col,...queryConstraints,limit(PAGE_SIZE))
 
-  //   return new Promise((resolve,reject)=>{
-  //   var document = doc(this.firestoreNew,`transactions`,uid,'transactions',id)
-  //     getDoc(document).then(d=>{
-  //       if(!d.exists()) reject()
-  //       else{
-  //         result.id = d.id
-  //         result.result = [d.data() as Transaction]
-
-  //         var prevPromise = this.getPreviousTransactionId(d).then(i=>result.previousId=i)
-  //         var nextPromies = this.getNextTransactionId(d).then(i=>result.nextId=i)
-  //         Promise.allSettled([prevPromise,nextPromies]).then(_=>resolve(result))
-  //       }
-  //     })
-  //   })
-
-  // }
-
-
-  private getPreviousTransactionId(doc:DocumentSnapshot):Promise<string>{
-    var q = query(doc.ref.parent,orderBy('timeOfTransaction','asc'),limitToLast(1),endBefore(doc))
-    var docs = getDocs(q)
-
-    return new Promise((resolve,reject)=>{
-      docs.then(qs=>{
-        console.log("prev response")
-        console.log(qs.docs.map(i=>i.id))
-
-        if(qs.size==0) reject()
-        else{
-          resolve(qs.docs[0].id)
+  return new Promise((resolve,reject)=>{
+    getDocs(q).then(docs=>{
+      const firstDoc = docs.docs[0]
+      const lastDoc = docs.docs[docs.size-1]
+      if(docs.size == 0) {reject();return}
+      var result: PagedQuery<Transaction> ={
+        id: `${firstDoc.id},${lastDoc.id}`,
+        result: docs.docs.map(d=>d.data() as Transaction),
+        prevPage: ()=>this.getPrevTransactionListPromise(firstDoc,queryConstraints,()=>result),
+        nextPage: ()=>this.getNextTransactionListPromise(lastDoc,queryConstraints,()=>result)
       }
-      }
-        ,e=>reject(e))
+      resolve(result)
+    }).catch(e=>{reject(e)})
+  })
+}
+
+
+getTransactionList2(firstSnapshot:DocumentSnapshot,lastSnapshot:DocumentSnapshot,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
+console.log("getTransaction2")
+var q = query(lastSnapshot.ref.parent,...queryConstraints,startAfter(firstSnapshot),endBefore(lastSnapshot))
+
+return new Promise((resolve,reject)=>{
+  getDocs(q).then(docs=>{
+    const firstDoc = docs.docs[0]
+        const lastDoc = docs.docs[docs.size-1]
+        if(docs.size == 0) {reject();return}
+        var result: PagedQuery<Transaction> ={
+          id: `${firstDoc.id},${lastDoc.id}`,
+          result: docs.docs.map(d=>d.data() as Transaction),
+          prevPage: ()=>this.getPrevTransactionListPromise(firstDoc,queryConstraints,()=>result),
+          nextPage: ()=>this.getNextTransactionListPromise(lastDoc,queryConstraints,()=>result)
+        }
+        resolve(result)
     })
-  }
+  })
+}
 
-  private getNextTransactionId(doc:DocumentSnapshot):Promise<string>{
-    var q = query(doc.ref.parent,orderBy('timeOfTransaction','asc'),limit(1),startAfter(doc))
-    var docs = getDocs(q)
+getNextTransactionListPromise(lastSnapshot:DocumentSnapshot,queryConstraints:QueryConstraint[],oldResults:()=>PagedQuery<Transaction>):Promise<PagedQuery<Transaction>>{
+console.log("getNextTransactionListPromise")
+var q = query(lastSnapshot.ref.parent,...queryConstraints,startAfter(lastSnapshot),limit(PAGE_SIZE))
 
-    return new Promise((resolve,reject)=>{
-      docs.then(qs=>{
-        if(qs.size==0) reject()
-        else{
-          console.log("next response")
-          console.log(qs)
-          resolve(qs.docs[0].id)
+  return new Promise((resolve,reject)=>{
+    getDocs(q).then(docs=>{
+      const firstDoc = docs.docs[0]
+      const lastDoc = docs.docs[docs.size-1]
+      if(docs.size == 0) {reject();return}
+      var result: PagedQuery<Transaction> ={
+        id: `${firstDoc.id},${lastDoc.id}`,
+        result: docs.docs.map(d=>d.data() as Transaction),
+        prevPage: ()=>Promise.resolve(oldResults()),
+        nextPage: ()=>this.getNextTransactionListPromise(lastDoc,queryConstraints,()=>result)
       }
-      }
-        ,e=>reject(e))
+      resolve(result)
     })
-  }
+  })
+}
 
+getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:QueryConstraint[],oldResults:()=>PagedQuery<Transaction>):Promise<PagedQuery<Transaction>>{
+  console.log("getPrevTransactionListPromise")
+  var q = query(firstSnapshot.ref.parent,...queryConstraints,endBefore(firstSnapshot),limitToLast(PAGE_SIZE))
+
+  return new Promise((resolve,reject)=>{
+    getDocs(q).then(docs=>{
+      const firstDoc = docs.docs[0]
+      const lastDoc = docs.docs[docs.size-1]
+      if(docs.size == 0) {reject();return}
+      var result: PagedQuery<Transaction> ={
+        id: `${firstDoc.id},${lastDoc.id}`,
+        result: docs.docs.map(d=>d.data() as Transaction),
+        nextPage: ()=>Promise.resolve(oldResults()),
+        prevPage: ()=>this.getPrevTransactionListPromise(firstDoc,queryConstraints,()=>result)
+      }
+      resolve(result)
+    })
+  })
+}
 
   registerTransaction(transaction: Transaction): Promise<any>{
     if(this.userService.currentUser?.uid==null) return Promise.reject()
@@ -178,18 +218,23 @@ private lambdaPrevTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryCo
   })}
 
   getEarnings(queryTransaction: PagedQuery<Transaction>): number{
-    // TODO
-    return 0
+    return queryTransaction.result
+      .map(t=>t.amount)
+      .filter(a=>a>0)
+      .reduce((p,c)=>p+c)
   }
 
   getSpendings(queryTransaction: PagedQuery<Transaction>): number{
-    // TODO
-    return 0
+    return queryTransaction.result
+    .map(t=>t.amount)
+    .filter(a=>a<0)
+    .reduce((p,c)=>p+c)
   }
 
   getBalance(queryTransaction: PagedQuery<Transaction>): number{
-    // TODO
-    return 0
+    return queryTransaction.result
+      .map(t=>t.amount)
+      .reduce((p,c)=>p+c)
   }
 
 }

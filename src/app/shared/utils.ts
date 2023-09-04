@@ -16,7 +16,7 @@ export function dateStringToDate(str: string):Date{
     var ops: WhereFilterOp[] = ['==','<=','>=','!=','<', '>', 'not-in','array-contains', 'in', 'array-contains-any',]
     var ret = {field:"",op:ops[0],value:""}
     ops.forEach( op=>{
-        var splut = str.split(op)
+        var splut = str.split(op,1)
         if(splut.length>1){
             ret.field = splut[0]
             ret.op = op
