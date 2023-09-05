@@ -13,8 +13,7 @@ export class TransactionTableComponent {
 
   queryConstraints:QueryConstraint[] = []
   response: PagedQuery<Transaction> = {
-    id: '',
-    result: []
+    results: []
   }
   constructor(
     private transactionService: TransactionsService

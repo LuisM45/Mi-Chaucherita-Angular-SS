@@ -9,11 +9,11 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let t of response.result">
-            <td>{{ t.title }}</td>
-            <td>{{ t.amount }}</td>
-            <td>{{ t.timeOfTransaction }}</td>
-            <td>{{ t.description }}</td>
+        <tr *ngFor="let t of response.results">
+            <td style="color: blue;" [routerLink]="['/','transaction','view',t.id]">{{ t.data.title }}</td>
+            <td>{{ t.data.amount }}</td>
+            <td>{{ t.data.timeOfTransaction }}</td>
+            <td>{{ t.data.description }}</td>
         </tr>
     </tbody>
 </table>

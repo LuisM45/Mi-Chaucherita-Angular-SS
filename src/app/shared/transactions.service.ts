@@ -22,7 +22,7 @@ export class TransactionsService {
   getTransactions(max: number, filter:any ): PagedQuery<Transaction>{
     // TODO
     max; filter
-    return {id:"",result:[]}
+    return {results:[]}
   }
 
   getRecentQuery(id:string): PagedQuery<Transaction> | null{
@@ -59,8 +59,7 @@ getTransaction1(id:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery
 getTransaction2(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
   console.log("getTransaction2")
   var result:PagedQuery<Transaction> = {
-    id: snapshot.id,
-    result: [snapshot.data() as Transaction]
+    results: [{id:snapshot.id, data:snapshot.data() as Transaction}]
   }
 
   var nextPromise = this.lambdaNextTransaction(snapshot,queryConstraints).then(r=>result.nextPage=r)
@@ -133,8 +132,7 @@ getTransactionList1(queryConstraints:QueryConstraint[]):Promise<PagedQuery<Trans
       const lastDoc = docs.docs[docs.size-1]
       if(docs.size == 0) {reject();return}
       var result: PagedQuery<Transaction> ={
-        id: `${firstDoc.id},${lastDoc.id}`,
-        result: docs.docs.map(d=>d.data() as Transaction),
+        results: docs.docs.map(d=>{return {id:d.id, data:d.data() as Transaction}}),
         prevPage: ()=>this.getPrevTransactionListPromise(firstDoc,queryConstraints,()=>result),
         nextPage: ()=>this.getNextTransactionListPromise(lastDoc,queryConstraints,()=>result)
       }
@@ -154,8 +152,7 @@ return new Promise((resolve,reject)=>{
         const lastDoc = docs.docs[docs.size-1]
         if(docs.size == 0) {reject();return}
         var result: PagedQuery<Transaction> ={
-          id: `${firstDoc.id},${lastDoc.id}`,
-          result: docs.docs.map(d=>d.data() as Transaction),
+          results: docs.docs.map(d=>{return {id:d.id, data: d.data() as Transaction}}),
           prevPage: ()=>this.getPrevTransactionListPromise(firstDoc,queryConstraints,()=>result),
           nextPage: ()=>this.getNextTransactionListPromise(lastDoc,queryConstraints,()=>result)
         }
@@ -174,8 +171,7 @@ var q = query(lastSnapshot.ref.parent,...queryConstraints,startAfter(lastSnapsho
       const lastDoc = docs.docs[docs.size-1]
       if(docs.size == 0) {reject();return}
       var result: PagedQuery<Transaction> ={
-        id: `${firstDoc.id},${lastDoc.id}`,
-        result: docs.docs.map(d=>d.data() as Transaction),
+        results: docs.docs.map(d=>{return {id:d.id, data: d.data() as Transaction}}),
         prevPage: ()=>Promise.resolve(oldResults()),
         nextPage: ()=>this.getNextTransactionListPromise(lastDoc,queryConstraints,()=>result)
       }
@@ -194,8 +190,7 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
       const lastDoc = docs.docs[docs.size-1]
       if(docs.size == 0) {reject();return}
       var result: PagedQuery<Transaction> ={
-        id: `${firstDoc.id},${lastDoc.id}`,
-        result: docs.docs.map(d=>d.data() as Transaction),
+        results: docs.docs.map(d=>{return{id:d.id, data:d.data() as Transaction}}),
         nextPage: ()=>Promise.resolve(oldResults()),
         prevPage: ()=>this.getPrevTransactionListPromise(firstDoc,queryConstraints,()=>result)
       }
@@ -218,25 +213,25 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
   })}
 
   getEarnings(queryTransaction: PagedQuery<Transaction>): number{
-    if(queryTransaction.result.length==0) return 0
-    return queryTransaction.result
-      .map(t=>t.amount)
+    if(queryTransaction.results.length==0) return 0
+    return queryTransaction.results
+      .map(t=>t.data.amount)
       .filter(a=>a>0)
       .reduce((p,c)=>p+c,0)
   }
 
   getSpendings(queryTransaction: PagedQuery<Transaction>): number{
-    if(queryTransaction.result.length==0) return 0
-    return queryTransaction.result
-    .map(t=>t.amount)
+    if(queryTransaction.results.length==0) return 0
+    return queryTransaction.results
+    .map(t=>t.data.amount)
     .filter(a=>a<0)
     .reduce((p,c)=>p+c,0)
   }
 
   getBalance(queryTransaction: PagedQuery<Transaction>): number{
-    if(queryTransaction.result.length==0) return 0
-    return queryTransaction.result
-      .map(t=>t.amount)
+    if(queryTransaction.results.length==0) return 0
+    return queryTransaction.results
+      .map(t=>t.data.amount)
       .reduce((p,c)=>p+c,0)
   }
 

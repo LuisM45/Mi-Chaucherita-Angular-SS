@@ -14,8 +14,7 @@ import { fireFilterSpliter, getQueryConstraints, toLocalStringUpToMinute } from 
 })
 export class TransactionDetailComponent {
   response: PagedQuery<Transaction> = {
-    id: '',
-    result: []
+    results: []
   }
   transaction: Transaction = {
     title: '',
@@ -51,7 +50,7 @@ export class TransactionDetailComponent {
       console.log("Service response")
       console.log(i)
       this.response = i
-      this.transaction = this.response.result[0]
+      this.transaction = this.response.results[0].data
       this.hasNext = i.nextPage != undefined
       this.hasPrev = i.prevPage != undefined
     }
@@ -63,14 +62,14 @@ export class TransactionDetailComponent {
 
   navigateNext(){
     this.response.nextPage!!().then(d=>{
-      this.router.navigate(['..',d.id],{relativeTo:this.route,queryParamsHandling:'preserve'})
+      this.router.navigate(['..',d.results[0].id],{relativeTo:this.route,queryParamsHandling:'preserve'})
     })
     
   }
 
   navigatePrevious(){
     this.response.prevPage!!().then(d=>{
-      this.router.navigate(['..',d.id],{relativeTo:this.route,queryParamsHandling:'preserve'})
+      this.router.navigate(['..',d.results[0].id],{relativeTo:this.route,queryParamsHandling:'preserve'})
     })
   }
 }
