@@ -10,7 +10,7 @@
     </thead>
     <tbody>
         <tr *ngFor="let t of response.results">
-            <td style="color: blue;" [routerLink]="['/','transaction','view',t.id]">{{ t.data.title }}</td>
+            <td style="color: blue;" (click)="viewTransaction(t.id,t.data)">{{ t.data.title }}</td>
             <td>{{ t.data.amount }}</td>
             <td>{{ t.data.timeOfTransaction }}</td>
             <td>{{ t.data.description }}</td>
