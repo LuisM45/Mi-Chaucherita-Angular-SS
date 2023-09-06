@@ -1,0 +1,6 @@
+<p>register-transaction works!</p>
+<input [(ngModel)]="transaction.title" placeholder="Titulo"><br>
+<input [(ngModel)]="transaction.amount" placeholder="10.00" type="number" step="0.01"><br>
+<input [(ngModel)]="timeOfTransaction" type="datetime-local" ><br>
+<textarea [(ngModel)]="transaction.description"></textarea><br>
+<button (click)="update()">Registrar</button>

@@ -1,9 +1,10 @@
 import { ActivatedRoute } from "@angular/router"
-import { OrderByDirection, QueryConstraint, WhereFilterOp, orderBy, where } from "firebase/firestore"
+import { DocumentSnapshot, OrderByDirection, QueryConstraint, Timestamp, WhereFilterOp, orderBy, where } from "firebase/firestore"
+import { Transaction } from "../interfaces/transaction.interface"
 
 
 export function toLocalStringUpToMinute(date: Date):string{
-    var dateString = date.toJSON()
+    var dateString = date.toISOString()
     var until = dateString.lastIndexOf(':')
     return dateString.substring(0,until)
 }
@@ -12,7 +13,7 @@ export function dateStringToDate(str: string):Date{
     return new Date(str+'Z')
 }
 
-    export function fireFilterSpliter(str:string):{field:string,op:WhereFilterOp,value:string}{
+export function fireFilterSpliter(str:string):{field:string,op:WhereFilterOp,value:string}{
     var ops: WhereFilterOp[] = ['==','<=','>=','!=','<', '>', 'not-in','array-contains', 'in', 'array-contains-any',]
     var ret = {field:"",op:ops[0],value:""}
     ops.forEach( op=>{
@@ -51,4 +52,11 @@ export function getQueryConstraints(route:ActivatedRoute):Promise<QueryConstrain
         resolve(qConstr)
       })
     })
+  }
+
+  export function parseDocToTransaction(documentSnapshot:DocumentSnapshot):Transaction{
+    const data = documentSnapshot.data()
+    var value:Transaction = data as Transaction
+    value.timeOfTransaction = (data!!['timeOfTransaction'] as Timestamp).toDate()
+    return value
   }

@@ -53,6 +53,7 @@ registerWithPasswordAndEmail(email:string,password:string){
   
 }
 logout(){
-
+  localStorage.removeItem("user")
+  this.currentUser = null
 }
 }

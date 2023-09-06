@@ -32,7 +32,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     TransactionsModule,
     DashboardModule,
     RouterModule.forRoot([
-      {path: '', redirectTo:'/login', pathMatch:'full'},
+      {path: '', redirectTo:'/dashboard', pathMatch:'full'},
       {path: '**', component:NotFoundComponent}
     ]),
     AngularFireModule.initializeApp(environment.firebase),

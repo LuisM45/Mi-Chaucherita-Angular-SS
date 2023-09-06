@@ -1,4 +1,6 @@
 <p>transaction-detail works!</p>
+<li style="color: blue;" [routerLink]="['/','transaction','edit',id]"> Editar</li>
+<li style="color: red;" (click)="delete()"> Eliminar</li>
 <p>Title: {{ transaction.title }}</p>
 <p>amount: {{ transaction.amount | currency }}</p>
 <p>datetime: {{ transaction.timeOfTransaction }}</p>

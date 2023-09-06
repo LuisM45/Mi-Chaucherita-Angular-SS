@@ -13,9 +13,11 @@ import { fireFilterSpliter, getQueryConstraints, toLocalStringUpToMinute } from 
   styleUrls: ['./transaction-detail.component.scss']
 })
 export class TransactionDetailComponent {
+
   response: PagedQuery<Transaction> = {
     results: []
   }
+  id = ""
   transaction: Transaction = {
     title: '',
     amount: 0,
@@ -50,6 +52,7 @@ export class TransactionDetailComponent {
       console.log("Service response")
       console.log(i)
       this.response = i
+      this.id = i.results[0].id
       this.transaction = this.response.results[0].data
       this.hasNext = i.nextPage != undefined
       this.hasPrev = i.prevPage != undefined
@@ -70,6 +73,12 @@ export class TransactionDetailComponent {
   navigatePrevious(){
     this.response.prevPage!!().then(d=>{
       this.router.navigate(['..',d.results[0].id],{relativeTo:this.route,queryParamsHandling:'preserve'})
+    })
+  }
+
+  delete() {
+    this.transactions.deleteTransaction(this.id).then(t=>{
+      this.router.navigate(["dashboard"])
     })
   }
 }

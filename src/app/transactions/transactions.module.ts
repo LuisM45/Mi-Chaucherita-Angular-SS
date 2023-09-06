@@ -5,6 +5,8 @@ import { TransactionDetailComponent } from './transaction-detail/transaction-det
 import { TransactionTableComponent } from './transaction-table/transaction-table.component';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { authGuard } from '../guard/auth.guard';
+import { TransactionEditComponent } from './transaction-edit/transaction-edit.component';
 
 
 
@@ -12,15 +14,17 @@ import { FormsModule } from '@angular/forms';
   declarations: [
     RegisterTransactionComponent,
     TransactionDetailComponent,
-    TransactionTableComponent
+    TransactionTableComponent,
+    TransactionEditComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     RouterModule.forChild([
-      {path:"transaction/register" , component: RegisterTransactionComponent},
-      {path:"transaction/view/:id" , component: TransactionDetailComponent},
-      {path:"transaction/table" , component: TransactionTableComponent},
+      {path:"transaction/register" , component: RegisterTransactionComponent, canActivate: [authGuard]},
+      {path:"transaction/view/:id" , component: TransactionDetailComponent, canActivate: [authGuard]},
+      {path:"transaction/edit/:id" , component: TransactionEditComponent, canActivate: [authGuard]},
+      {path:"transaction/table" , component: TransactionTableComponent, canActivate: [authGuard]},
     ])
   ],
   exports:[

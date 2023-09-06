@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { where } from 'firebase/firestore';
 import { TransactionsService } from 'src/app/shared/transactions.service';
+import { UserService } from 'src/app/shared/user.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,13 +11,16 @@ import { TransactionsService } from 'src/app/shared/transactions.service';
 })
 
 export class DashboardComponent {
+  
   balance?: number = undefined
   spendings?: number = undefined
   earnings?: number = undefined
 
 
   constructor(
-    public transactionsService: TransactionsService
+    public transactionsService: TransactionsService,
+    public userService: UserService,
+    public router:Router
   ){
     this.loadBalances()
   }
@@ -31,5 +36,11 @@ export class DashboardComponent {
       this.spendings = this.transactionsService.getSpendings(qr)
     })
     
+  }
+
+  logout() {
+    console.log("logout attempted")
+    this.userService.logout()
+    this.router.navigate(["login"])
   }
 }
