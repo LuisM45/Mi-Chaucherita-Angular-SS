@@ -35,14 +35,11 @@ export class TransactionsService {
 
 
 getTransaction(id:string):Promise<PagedQuery<Transaction>>{
-    console.log("getTransaction0")
     return this.getTransaction1(id,[orderBy("timeOfTransaction","asc")])
 }
 getTransaction1(id:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
-  console.log("getTransaction1")
   if(this.userService.currentUser?.uid==null) return Promise.reject()
   const uid = this.userService.currentUser.uid!!
-  console.log("getTransaction1:a")
   
 
     return new Promise((resolve,reject)=>{
@@ -60,7 +57,6 @@ getTransaction1(id:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery
 
 
 getTransaction2(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
-  console.log("getTransaction2")
   var transaction = parseDocToTransaction(snapshot)
   this.cache.set(snapshot.id,transaction)
   var result:PagedQuery<Transaction> = {
@@ -92,7 +88,7 @@ private lambdaNextTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryCo
       result.nextPage = ()=>this.lambdaNextTransaction(_doc,queryConstraints,()=>result)
       resolve(result)
     }).catch(e=>
-      console.log(e)
+      reject(e)
     )
   })
 }
@@ -116,18 +112,16 @@ private lambdaPrevTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryCo
       result.results = docs.docs.map(d=>{return{id:d.id,data:parseDocToTransaction(d)}})
       resolve(result)
     }).catch(e=>
-      console.log(e)
+      reject(e)
     )
   })
 }
 
 getTransactionList():Promise<PagedQuery<Transaction>>{
-  console.log("getTransactionList")
   return this.getTransactionList1([orderBy("timeOfTransaction","asc"),limit(PAGE_SIZE)])
 }
 
 getTransactionList1a(startId:string,endId:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
-  console.log("getTransaction1a")
   if(this.userService.currentUser?.uid==null) return Promise.reject()
   const uid = this.userService.currentUser.uid!!
   var docStart = doc(this.firestoreNew,`transactions`,uid,'transactions',startId)
@@ -145,7 +139,6 @@ getTransactionList1a(startId:string,endId:string,queryConstraints:QueryConstrain
 }
 
 getTransactionList1(queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
-  console.log("getTransactionList1")
   if(this.userService.currentUser?.uid==null) return Promise.reject()
   const uid = this.userService.currentUser.uid!!
   var col = collection(this.firestoreNew,`transactions`,uid,'transactions')
@@ -168,7 +161,6 @@ getTransactionList1(queryConstraints:QueryConstraint[]):Promise<PagedQuery<Trans
 
 
 getTransactionList2(firstSnapshot:DocumentSnapshot,lastSnapshot:DocumentSnapshot,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
-console.log("getTransaction2")
 var q = query(lastSnapshot.ref.parent,...queryConstraints,startAfter(firstSnapshot),endBefore(lastSnapshot))
 
 return new Promise((resolve,reject)=>{
@@ -187,7 +179,6 @@ return new Promise((resolve,reject)=>{
 }
 
 getNextTransactionListPromise(lastSnapshot:DocumentSnapshot,queryConstraints:QueryConstraint[],oldResults:()=>PagedQuery<Transaction>):Promise<PagedQuery<Transaction>>{
-console.log("getNextTransactionListPromise")
 var q = query(lastSnapshot.ref.parent,...queryConstraints,startAfter(lastSnapshot),limit(PAGE_SIZE))
 
   return new Promise((resolve,reject)=>{
@@ -205,7 +196,6 @@ var q = query(lastSnapshot.ref.parent,...queryConstraints,startAfter(lastSnapsho
 }
 
 getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:QueryConstraint[],oldResults:()=>PagedQuery<Transaction>):Promise<PagedQuery<Transaction>>{
-  console.log("getPrevTransactionListPromise")
   var q = query(firstSnapshot.ref.parent,...queryConstraints,endBefore(firstSnapshot),limitToLast(PAGE_SIZE))
 
   return new Promise((resolve,reject)=>{

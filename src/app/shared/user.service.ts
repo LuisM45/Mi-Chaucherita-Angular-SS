@@ -14,7 +14,6 @@ export class UserService {
   }
 
 loadSession(){
-  console.log("loading user")
   var user = localStorage.getItem("user")
   if(user==null) return
   this.currentUser = JSON.parse(user)
@@ -34,7 +33,7 @@ logWithPasswordAndEmail(email:string,password:string){
       this.currentUser = it.user
       this.storeSession()
     })
-    .catch( e => {console.log(e);reject(e)})
+    .catch( e => {reject(e)})
   })
 }
 
@@ -48,7 +47,7 @@ registerWithPasswordAndEmail(email:string,password:string){
       this.currentUser = it.user
       this.storeSession()
     })
-    .catch( e => {console.log(e);reject(e)})
+    .catch( e => {reject(e)})
   })
   
 }

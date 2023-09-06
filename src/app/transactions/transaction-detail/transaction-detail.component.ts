@@ -33,7 +33,6 @@ export class TransactionDetailComponent {
     private transactions: TransactionsService,
     private cache:CacheService
   ){
-      console.log("ctor")
       this.resubscribeRouter()
     
   }
@@ -41,7 +40,9 @@ export class TransactionDetailComponent {
   subscription: Subscription | undefined
   private subscribeFun = (params:ParamMap) =>{
     this.id = params.get("id")!!
-    this.cache.get<Transaction>(this.id!!).then(r=>this.response.results.push({id:this.id!!,data:r}))
+    this.cache.get<Transaction>(this.id!!)
+      .then(r=>this.response.results.push({id:this.id!!,data:r}))
+      .catch(_=>{})
 
     getQueryConstraints(this.route).then( constraints =>{
       this.loadTransactionData(this.id!!,constraints)
@@ -82,8 +83,8 @@ export class TransactionDetailComponent {
         this.router.navigate(['..',transaction.id],{relativeTo:this.route,queryParamsHandling:'preserve'})
         this.resubscribeRouter()
       }
-    })
-    else this.navigateNext = undefined
+    }).catch(_=>this.navigateNext = undefined)
+    else  this.navigateNext = undefined
 
     if(this.response.prevPage) this.response.prevPage().then(page=>{ 
       this.navigatePrevious = ()=>{
@@ -94,7 +95,7 @@ export class TransactionDetailComponent {
         this.router.navigate(['..',transaction.id],{relativeTo:this.route,queryParamsHandling:'preserve'})
         this.resubscribeRouter()
       }
-    })
+    }).catch(_=>this.navigatePrevious = undefined)
     else this.navigatePrevious = undefined
   }
 
