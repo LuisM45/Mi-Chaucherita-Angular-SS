@@ -12,24 +12,33 @@ export class LoginComponent {
 
   username: string = "";
   password: string = "";
+  name: string = "";
+  lastname: string = "";
+  showRegistrationForm: boolean = false;
+  isLoginForm: boolean = true;
 
   constructor(
     public userService: UserService,
     public router: Router
-    ){
+  ) {
 
   }
 
-  login(){
+  login() {
     console.log(`login ${this.username} ${this.password}`)
-    this.userService.logWithPasswordAndEmail(this.username,this.password)
-    .then(_=>this.router.navigate(["/","dashboard"]))
-    
+    this.userService.logWithPasswordAndEmail(this.username, this.password)
+      .then(_ => this.router.navigate(["/", "dashboard"]))
+
   }
 
-  register(){
+  register() {
     console.log(`register ${this.username} ${this.password}`)
-    this.userService.registerWithPasswordAndEmail(this.username,this.password)
-      .then(_=>this.router.navigate(["/","dashboard"]))
+    this.userService.registerWithPasswordAndEmail(this.username, this.password)
+      .then(_ => this.router.navigate(["/", "dashboard"]))
+  }
+
+  toggleForm() {
+    this.showRegistrationForm = !this.showRegistrationForm;
+    this.isLoginForm = !this.isLoginForm;
   }
 }
