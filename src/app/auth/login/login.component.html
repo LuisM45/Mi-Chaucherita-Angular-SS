@@ -9,7 +9,7 @@
           <div class="w-full">
             <label for="username">Usuario*</label><br>
             <input [(ngModel)]="username" #txtusername="ngModel" name="username" placeholder="username"
-              class="w-full px-2" require type="email">
+              class="w-full px-2" require type="email" email>
             <!-- Mensaje de error si el campo es inválido -->
             <div class="text-red-500 text-xs" *ngIf="txtusername.invalid && (txtusername.dirty || txtusername.touched)">
               <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['required']">El usuario es requerido.</div>
