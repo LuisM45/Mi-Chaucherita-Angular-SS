@@ -9,12 +9,10 @@
           <div class="w-full">
             <label for="username">Usuario*</label><br>
             <input [(ngModel)]="username" #txtusername="ngModel" name="username" placeholder="username"
-              class="w-full px-2" required minlength="8" type="email">
+              class="w-full px-2" require type="email">
             <!-- Mensaje de error si el campo es inválido -->
             <div class="text-red-500 text-xs" *ngIf="txtusername.invalid && (txtusername.dirty || txtusername.touched)">
               <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['required']">El usuario es requerido.</div>
-              <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['minlength']">El usuario debe tener al menos
-                8 caracteres.</div>
               <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['email']">El usuario debe ser un correo
                 electrónico válido.</div>
             </div>
