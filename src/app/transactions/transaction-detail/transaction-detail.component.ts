@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { OrderByDirection, QueryConstraint, orderBy, where } from 'firebase/firestore';
-import { filter } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
 import { PagedQuery } from 'src/app/interfaces/query.interface';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
+import { CacheService } from 'src/app/shared/cache.service';
 import { TransactionsService } from 'src/app/shared/transactions.service';
 import { fireFilterSpliter, getQueryConstraints, toLocalStringUpToMinute } from 'src/app/shared/utils';
 
@@ -17,45 +18,54 @@ export class TransactionDetailComponent {
   response: PagedQuery<Transaction> = {
     results: []
   }
-  id = ""
-  transaction: Transaction = {
-    title: '',
-    amount: 0,
-    timeOfTransaction: new Date(),
-    description: ''
+
+  public get transaction():Transaction | undefined{
+    if(this.response.results.length==0) return undefined
+    return this.response.results[0].data
   }
-  hasNext: boolean = false
-  hasPrev: boolean = false
+
+  
+  public id:string | undefined
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private transactions: TransactionsService
+    private transactions: TransactionsService,
+    private cache:CacheService
   ){
-      console.log("ctor")
-      route.paramMap.subscribe(i=>{
-      console.log("subs")
-      getQueryConstraints(route).then(c=>{
-          this.loadTransactionData(i.get('id')!!,c)
-        })
-      
-    }
-    )
+      this.resubscribeRouter()
     
   }
 
+  subscription: Subscription | undefined
+  private subscribeFun = (params:ParamMap) =>{
+    this.id = params.get("id")!!
+    this.cache.get<Transaction>(this.id!!)
+      .then(r=>this.response.results.push({id:this.id!!,data:r}))
+      .catch(_=>{})
+
+    getQueryConstraints(this.route).then( constraints =>{
+      this.loadTransactionData(this.id!!,constraints)
+    })
+    
+  }
+    
+  
+
+  desubscribeRouter(){
+    this.subscription?.unsubscribe()
+  }
+
+  resubscribeRouter(){
+    this.subscription = this.route.paramMap.subscribe(this.subscribeFun)
+  }
   
 
   loadTransactionData(id: string, constraints: QueryConstraint[]){
     this.transactions.getTransaction1(id,constraints)
     .then( i=>{
-      console.log("Service response")
-      console.log(i)
       this.response = i
-      this.id = i.results[0].id
-      this.transaction = this.response.results[0].data
-      this.hasNext = i.nextPage != undefined
-      this.hasPrev = i.prevPage != undefined
+      this.prepareNavigation()
     }
     ).catch(e=>
       console.log(e)
@@ -63,21 +73,38 @@ export class TransactionDetailComponent {
     
   }
 
-  navigateNext(){
-    this.response.nextPage!!().then(d=>{
-      this.router.navigate(['..',d.results[0].id],{relativeTo:this.route,queryParamsHandling:'preserve'})
-    })
-    
+  prepareNavigation(){
+    if(this.response.nextPage) this.response.nextPage().then(page=>{ 
+      this.navigateNext = ()=>{
+        this.response = page
+        const transaction = page.results[0]
+        this.prepareNavigation()
+        this.desubscribeRouter()
+        this.router.navigate(['..',transaction.id],{relativeTo:this.route,queryParamsHandling:'preserve'})
+        this.resubscribeRouter()
+      }
+    }).catch(_=>this.navigateNext = undefined)
+    else  this.navigateNext = undefined
+
+    if(this.response.prevPage) this.response.prevPage().then(page=>{ 
+      this.navigatePrevious = ()=>{
+        this.response = page
+        const transaction = page.results[0]
+        this.prepareNavigation()
+        this.desubscribeRouter()
+        this.router.navigate(['..',transaction.id],{relativeTo:this.route,queryParamsHandling:'preserve'})
+        this.resubscribeRouter()
+      }
+    }).catch(_=>this.navigatePrevious = undefined)
+    else this.navigatePrevious = undefined
   }
 
-  navigatePrevious(){
-    this.response.prevPage!!().then(d=>{
-      this.router.navigate(['..',d.results[0].id],{relativeTo:this.route,queryParamsHandling:'preserve'})
-    })
-  }
+  navigateNext: (()=>void) | undefined   = undefined
+
+  navigatePrevious: (()=>void) | undefined   = undefined
 
   delete() {
-    this.transactions.deleteTransaction(this.id).then(t=>{
+    this.transactions.deleteTransaction(this.id!!).then(t=>{
       this.router.navigate(["dashboard"])
     })
   }

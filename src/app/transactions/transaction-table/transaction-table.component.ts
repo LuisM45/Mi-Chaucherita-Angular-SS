@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { QueryConstraint } from 'firebase/firestore';
 import { PagedQuery } from 'src/app/interfaces/query.interface';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
+import { CacheService } from 'src/app/shared/cache.service';
 import { TransactionsService } from 'src/app/shared/transactions.service';
 
 @Component({
@@ -16,7 +18,9 @@ export class TransactionTableComponent {
     results: []
   }
   constructor(
-    private transactionService: TransactionsService
+    private transactionService: TransactionsService,
+    private cache: CacheService,
+    private router: Router
   ){
     transactionService.getTransactionList1([]).then(tl=>{
       console.log("svc response")
@@ -43,6 +47,11 @@ export class TransactionTableComponent {
 
   reload(){
 
+  }
+
+  viewTransaction(id:string,transaction:Transaction){
+    this.cache.set(id,transaction)
+    this.router.navigate(['/','transaction','view',id])
   }
 
   navigatePrevious() {
