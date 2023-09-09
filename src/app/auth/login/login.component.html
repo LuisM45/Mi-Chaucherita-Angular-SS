@@ -35,7 +35,7 @@
       <ng-template #registrationForm class="transition-transform duration-300">
         <form class="flex flex-col gap-4 md:pt-2 pt-6">
           <div class="w-full">
-            <label for="name">Nombre</label><br>
+            <label for="name">Nombre*</label><br>
             <input [(ngModel)]="name" #txtname="ngModel" name="name" placeholder="Nombre" class="w-full px-2" required
               minlength="6" maxlength="17">
             <!-- Mensaje de error si el campo es inválido -->
@@ -50,7 +50,7 @@
           <div class="w-full">
             <label for="username">Usuario*</label><br>
             <input [(ngModel)]="username" #txtusername="ngModel" name="username" placeholder="username"
-              class="w-full px-2" required minlength="6" type="email">
+              class="w-full px-2" required minlength="6" type="email" email>
             <!-- Mensaje de error si el campo es inválido -->
             <div class="text-red-500 text-xs" *ngIf="txtusername.invalid && (txtusername.dirty || txtusername.touched)">
               <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['required']">El usuario es requerido.</div>
