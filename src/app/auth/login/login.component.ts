@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/shared/user.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
 
 @Component({
   selector: 'app-login',
@@ -11,29 +11,22 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 
 export class LoginComponent implements OnInit {
-
   username: string = "";
   password: string = "";
   repeatPassword: string = "";
   name: string = "";
   showRegistrationForm: boolean = false;
   isLoginForm: boolean = true;
-  loginForm!: FormGroup;
+
 
   constructor(
-    private formBuilder: FormBuilder,
     public userService: UserService,
     public router: Router,
   ) {
 
   }
   ngOnInit(): void {
-    this.loginForm = this.formBuilder.group({
-      username: ['', Validators.compose([Validators.required, Validators.email, Validators.minLength(6)],)],
-      password: ['', Validators.compose([Validators.required, Validators.minLength(6)])],
-      name: ['', Validators.required],
-      lastname: ['', Validators.required]
-    });
+
   }
 
   login() {
@@ -53,4 +46,5 @@ export class LoginComponent implements OnInit {
     this.showRegistrationForm = !this.showRegistrationForm;
     this.isLoginForm = !this.isLoginForm;
   }
+
 }

@@ -5,14 +5,29 @@
         <img src="/assets/imgLogin.jpg" alt="" class="md:h-[180px]">
       </div>
       <ng-container *ngIf="!showRegistrationForm; else registrationForm" class="transition-transform duration-300">
-        <form class=" flex flex-col gap-4 md:pt10 pt-6">
+        <form #loginForm="ngForm" class=" flex flex-col gap-4 md:pt10 pt-6">
           <div class="w-full">
             <label for="username">Usuario*</label><br>
-            <input [(ngModel)]="username" name="username" placeholder="username" class="w-full px-2">
+            <input [(ngModel)]="username" #txtusername="ngModel" name="username" placeholder="username"
+              class="w-full px-2" required minlength="8" type="email">
+            <!-- Mensaje de error si el campo es inválido -->
+            <div class="text-red-500 text-xs" *ngIf="txtusername.invalid && (txtusername.dirty || txtusername.touched)">
+              <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['required']">El usuario es requerido.</div>
+              <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['minlength']">El usuario debe tener al menos
+                8 caracteres.</div>
+              <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['email']">El usuario debe ser un correo
+                electrónico válido.</div>
+            </div>
           </div>
           <div>
             <label for="password">Contraseña*</label><br>
-            <input [(ngModel)]="password" name="password" placeholder="password" type="password" class="w-full px-2">
+            <input [(ngModel)]="password" #txtpassword="ngModel" name="password" placeholder="password" type="password"
+              class="w-full px-2" required>
+            <!-- Mensaje de error si el campo es inválido -->
+            <div class="text-red-500 text-xs" *ngIf="txtpassword.invalid && (txtpassword.dirty || txtpassword.touched)">
+              <div class="text-red-500 text-xs" *ngIf="txtpassword.errors?.['required']">La contraseña es requerida.
+              </div>
+            </div>
           </div>
         </form>
         <div class="flex justify-center pb-8 md:w-1/2 md:mx-auto w-full">
@@ -23,19 +38,58 @@
         <form class="flex flex-col gap-4 md:pt-2 pt-6">
           <div class="w-full">
             <label for="name">Nombre</label><br>
-            <input [(ngModel)]="name" name="name" placeholder="Nombre" class="w-full px-2">
+            <input [(ngModel)]="name" #txtname="ngModel" name="name" placeholder="Nombre" class="w-full px-2" required
+              minlength="6" maxlength="17">
+            <!-- Mensaje de error si el campo es inválido -->
+            <div class="text-red-500 text-xs" *ngIf="txtname.invalid && (txtname.dirty || txtname.touched)">
+              <div class="text-red-500 text-xs" *ngIf="txtname.errors?.['required']">El nombre es requerido.</div>
+              <div class="text-red-500 text-xs" *ngIf="txtname.errors?.['minlength']">El nombre debe tener al menos 6
+                caracteres.</div>
+              <div class="text-red-500 text-xs" *ngIf="txtname.errors?.['maxlength']">El nombre debe tener máximo 17
+                caracteres.</div>
+            </div>
           </div>
           <div class="w-full">
             <label for="username">Usuario*</label><br>
-            <input [(ngModel)]="username" name="username" placeholder="username" class="w-full px-2">
+            <input [(ngModel)]="username" #txtusername="ngModel" name="username" placeholder="username"
+              class="w-full px-2" required minlength="6" type="email">
+            <!-- Mensaje de error si el campo es inválido -->
+            <div class="text-red-500 text-xs" *ngIf="txtusername.invalid && (txtusername.dirty || txtusername.touched)">
+              <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['required']">El usuario es requerido.</div>
+              <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['minlength']">El usuario debe tener al menos
+                6 caracteres.</div>
+              <div class="text-red-500 text-xs" *ngIf="txtusername.errors?.['email']">El usuario debe ser un correo
+                electrónico válido.</div>
+            </div>
           </div>
           <div>
             <label for="password">Contraseña*</label><br>
-            <input [(ngModel)]="password" placeholder="password" type="password" class="w-full px-2">
+            <input [(ngModel)]="password" #txtpasswordR="ngModel" name="password" placeholder="password" type="password"
+              class="w-full px-2" required minlength="8">
+            <!-- Mensaje de error si el campo es inválido -->
+            <div class="text-red-500 text-xs"
+              *ngIf="txtpasswordR.invalid && (txtpasswordR.dirty || txtpasswordR.touched)">
+              <div class="text-red-500 text-xs" *ngIf="txtpasswordR.errors?.['required']">La contraseña es requerida.
+              </div>
+              <div class="text-red-500 text-xs" *ngIf="txtpasswordR.errors?.['minlength']">La contraseña debe tener al
+                menos 8 caracteres.</div>
+            </div>
           </div>
           <div>
             <label for="password">Repetir Contraseña*</label><br>
-            <input [(ngModel)]="repeatPassword" placeholder="password" type="password" class="w-full px-2">
+            <input [(ngModel)]="repeatPassword" #txtrepetirp="ngModel" name="repeatPassword" placeholder=" password"
+              type="password" class="w-full px-2" required minlength="8">
+            <!-- Mensaje de error si el campo es inválido -->
+            <div class="text-red-500 text-xs" *ngIf="txtrepetirp.invalid && (txtrepetirp.dirty || txtrepetirp.touched)">
+              <div class="text-red-500 text-xs" *ngIf="txtrepetirp.errors?.['required']">La contraseña es requerida.
+              </div>
+              <div class="text-red-500 text-xs" *ngIf="txtrepetirp.errors?.['minlength']">La contraseña debe tener al
+                menos 8 caracteres.</div>
+            </div>
+          </div>
+          <!-- hacer que las contrasenas coincidan-->
+          <div class="text-red-500 text-xs" *ngIf="repeatPassword != password">
+            <div class="text-red-500 text-xs">Las contraseñas no coinciden.</div>
           </div>
         </form>
         <div class="flex justify-center pb-8 md:w-1/2 md:mx-auto w-full">
