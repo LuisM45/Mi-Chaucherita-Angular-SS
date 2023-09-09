@@ -7,8 +7,10 @@
       <ng-container *ngIf="!showRegistrationForm; else registrationForm" class="transition-transform duration-300">
         <form class=" flex flex-col gap-4 md:pt10 pt-6">
           <div class="w-full">
-            <label for="username">Usuario*</label><br>
-            <input [(ngModel)]="username" placeholder="username" class="w-full px-2">
+            <mat-form-field appearance="fill">
+              <mat-label>Usuario*</mat-label>
+              <input matInput type="text" id="username" placeholder="username" class="w-full px-2">
+            </mat-form-field>
           </div>
           <div>
             <label for="password">Contraseña*</label><br>
