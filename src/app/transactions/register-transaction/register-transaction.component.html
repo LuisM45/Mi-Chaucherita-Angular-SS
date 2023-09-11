@@ -35,8 +35,11 @@
             class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"></textarea>
         </div>
 
-        <button (click)="register()"
-          class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-80">Registrar</button>
+        <div class="flex flex-row w-full justify-between px-20">
+          <button class="button2">Cancelar</button>
+
+          <button (click)="register()" class="button">Registrar</button>
+        </div>
       </form>
     </div>
 
