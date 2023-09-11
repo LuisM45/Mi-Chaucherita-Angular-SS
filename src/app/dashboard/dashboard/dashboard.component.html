@@ -1,8 +1,135 @@
-<p>dashboard works!</p>
-<p style="color: blue;" (click)="logout()">logout</p>
-<p style="color: blue;" routerLink="../transaction/register">Nuevo registro</p>
-<h1>Resumen del mes</h1>
-<p>Balance: {{ balance }}</p>
-<p>Gastos: {{ spendings }} </p>
-<p>Ingresos {{ earnings }} </p>
-<app-transaction-table></app-transaction-table>
+<section class="flex flex-row min-h-screen">
+  <aside class=" hidden lg:flex flex-col w-1/4 min-h-screen justify-between py-4">
+    <div class="flex flex-row gap-2 px-9">
+      <div>
+        <img src="assets/profile.png" alt="" class="w-20">
+      </div>
+      <div class="flex flex-col pt-4">
+        <p class="font-bold text-lg">@LuisM</p>
+        <p>Lunes, 01 ene, 2023</p>
+      </div>
+    </div>
+    <h2 class="text-center">Resumen del mes</h2>
+    <div class="flex flex-row w-full px-3 justify-between">
+      <div class="flex flex-row items-center hover:cursor-pointer">
+        <img src="assets/meses.svg" alt="icono de filtrado por mes">
+        <span class="hover:underline">Filtrar por mes</span>
+      </div>
+      <div class="flex flex-row items-center hover:cursor-pointer">
+        <img src="assets/fechas.svg" alt="icono de filtrado fecha por ">
+        <span class="hover:underline">Filtrar por fechas</span>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2 mx-auto">
+
+      <div class="flex flex-col items-start ">
+        <p class="text-2xl">Ingresos</p>
+        <p class="text-3xl text-green-500">$ {{ earnings }}</p>
+      </div>
+
+      <div class="flex flex-col ">
+        <p class="text-2xl">Gastos</p>
+        <p class="text-3xl text-red-500 ">$ {{ spendings }}</p>
+      </div>
+
+      <div class="flex flex-col ">
+        <p class="text-2xl">Balance</p>
+        <p class="text-3xl">$ {{ balance }}</p>
+      </div>
+
+    </div>
+    <div class="w-3/4 mx-auto">
+      <button class="button ">Ver Movimientos</button>
+    </div>
+  </aside>
+
+  <!-- asside resposive -->
+  <div *ngIf="isAsideOpen">
+    <aside
+      class="absolute z-20 p-4 translate-x-3 translate-y-20 bg-white w-11/12 flex  justify-between flex-col h-[600px]">
+      <div class=" flex flex-row justify-between ">
+        <div>
+          <img src="assets/profile.png" class="w-24">
+        </div>
+        <div class=" flex flex-col pt-4 ">
+          <p class="font-bold">@LuisM</p>
+          <p>Lunes, 01 ene, 2023</p>
+        </div>
+      </div>
+      <h2 class=" text-center">Resumen del mes</h2>
+      <div class="flex flex-col gap-2 w-full  justify-center items-center">
+        <div class="flex flex-row items-center hover:cursor-pointer">
+          <img src="assets/meses.svg" alt="icono de filtrado por mes">
+          <span class="hover:underline ">Filtrar por mes</span>
+        </div>
+        <div class="flex flex-row items-center hover:cursor-pointer">
+          <img src="assets/fechas.svg" alt="icono de filtrado fecha por ">
+          <span class="hover:underline">Filtrar por fechas</span>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2 mx-auto ">
+
+        <div class="flex flex-col items-start ">
+          <p class="text-2xl">Ingresos</p>
+          <p class="text-3xl text-green-500">$ {{ earnings }}</p>
+        </div>
+
+        <div class="flex flex-col ">
+          <p class="text-2xl">Gastos</p>
+          <p class="text-3xl text-red-500 ">$ {{ spendings }}</p>
+        </div>
+
+        <div class="flex flex-col ">
+          <p class="text-2xl">Balance</p>
+          <p class="text-3xl">$ {{ balance }}</p>
+        </div>
+      </div>
+      <div class="w-3/4 mx-auto">
+        <button class="button ">Ver Movimientos</button>
+      </div>
+    </aside>
+  </div>
+
+  <article *ngIf="isAsideOpen" class="bg-opacity-60 bg-black absolute h-[718px] w-full z-10"></article>
+  <article class="w-full lg:w-3/4 bg-secondary min-h-screen">
+    <div class=" flex flex-col-reverse lg:flex-row px-2 py-3">
+      <div class="lg:w-3/4 flex justify-center pt-5 lg:pt-0 items-center">
+        <p class=" text-3xl ">Mis cuentas</p>
+      </div>
+      <div class="flex flex-col-reverse lg:flex-row justify-between w-full lg:w-1/4">
+        <div class=" mx-auto w-3/4 lg:w-2/3 lg:my-auto">
+          <button routerLink="../register-account" class="button">Agregar cuenta</button>
+        </div>
+
+        <div class="flex w-full lg:w-auto justify-between">
+          <button class="lg:hidden z-20 w-12 h-12 flex p-2" id="menu-button" (click)="toggleAside()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+              stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+          <button class="w-12 h-12 rounded-full bg-primary flex p-2" id="avatar-button" (click)="toggleMenu()">
+            <img src="assets/avatar.svg" alt="perfil de usuario">
+          </button>
+
+        </div>
+        <div *ngIf="isMenuOpen"
+          class="absolute translate-x-16 translate-y-12 w-40 bg-white border border-gray-300 shadow-lg rounded-lg">
+          <ul>
+            <li routerLink="../profile" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">Configuración de perfil</li>
+            <li (click)="logout()" class="px-4 py-2 hover:bg-gray-100 cursor-pointer">Cerrar sesión</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+    <div class="px-2  lg:px-10 py-4 lg:py-8 grid justify-center md:grid-cols-2 max-h-[544px] overflow-y-auto  ">
+      <!-- Renderizar la tarjetas -->
+      <div *ngFor="let account of accounts" class="mb-8 hover:scale-105 transition hover:cursor-pointer">
+        <app-account-card [accountId]="account.id" [accountName]="account.name" [accountBalance]="account.balance"
+          [accountType]="account.type" [lastTransactionReason]="account.lastTransactionReason"
+          [transactionCount]="account.transactionCount" [imageUrl]="account.imageUrl"></app-account-card>
+      </div>
+    </div>
+  </article>
+</section>

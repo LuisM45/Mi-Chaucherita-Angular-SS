@@ -1,16 +1,60 @@
-<p>transaction-detail works!</p>
-<li style="color: blue;" [routerLink]="['/','transaction','edit',id]"> Editar</li>
+<!-- <li style="color: blue;" [routerLink]="['/','transaction','edit',id]"> Editar</li>
 <li style="color: red;" (click)="delete()"> Eliminar</li>
-<ng-container *ngIf="transaction">    
-    <p>Title: {{ transaction.title }}</p>
-    <p>amount: {{ transaction.amount | currency }}</p>
-    <p>datetime: {{ transaction.timeOfTransaction }}</p>
-    <p>Description: {{ transaction.description }}</p>
-</ng-container>
+
 <ng-container *ngIf="navigateNext">
-    <li style="color: blue;" (click)="navigateNext()" >next</li>
+    <li style="color: blue;" (click)="navigateNext()">next</li>
 </ng-container>
 <ng-container *ngIf="navigatePrevious">
-    <li style="color: blue;" (click)="navigatePrevious()" >previous</li>
-</ng-container>
+    <li style="color: blue;" (click)="navigatePrevious()">previous</li>
+</ng-container> -->
+<!-- 
+<section class="min-h-screen bg-primary">
+    <div class="flex flex-col min-h-screen lg:w-2/5 mx-auto bg-secondary p-4">
+        <p class="text-3xl text-center">Detalle de moviento</p>
+        <ng-container *ngIf="transaction">
+            <p class="text-lg "> <span class="text-primary font-bold">Titulo:</span> {{ transaction.title }}</p>
+            <p class="text-lg"> <span class="text-primary font-bold">Monto:</span> {{ transaction.amount | currency }}
+            </p>
+            <p class="text-lg"> <span class="text-primary font-bold">Fecha:</span> {{ transaction.timeOfTransaction }}
+            </p>
+            <p class="text-lg"> <span class="text-primary font-bold">Descripcion:</span> {{ transaction.description }}
+            </p>
+        </ng-container>
+        
+    </div>
+</section> -->
 
+<section class="min-h-screen bg-primary">
+
+    <div class="flex flex-col min-h-screen lg:w-2/5 mx-auto bg-secondary p-4">
+        <div routerLink="" class=" absolute hover:cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-10 h-10">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            </svg>
+        </div>
+        <p class="text-3xl text-center">Detalle de movimiento</p>
+        <div class="bg-white rounded-lg shadow-lg p-4 my-4">
+            <ng-container *ngIf="transaction">
+                <p class="text-lg"><span class="text-primary font-bold">Título:</span> {{ transaction.title }}</p>
+                <p class="text-lg"><span class="text-primary font-bold">Monto:</span> {{ transaction.amount | currency
+                    }}</p>
+                <p class="text-lg"><span class="text-primary font-bold">Fecha:</span> {{ transaction.timeOfTransaction
+                    }}</p>
+                <p class="text-lg"><span class="text-primary font-bold">Descripción:</span> {{ transaction.description
+                    }}</p>
+            </ng-container>
+            <div class="flex flex-row w-full justify-center gap-6">
+                <button class="delete-button" (click)="delete()">Eliminar</button>
+                <button class="edit-button" [routerLink]="['/','transaction','edit',id]">
+                    Editar</button>
+            </div>
+        </div>
+
+        <div *ngIf="navigateNext || navigatePrevious" class="flex flex-row gap-4 w-full justify-center">
+            <button class="button cursor-pointer" (click)="navigatePrevious()"
+                *ngIf="navigatePrevious">anterior</button>
+            <button class="button" (click)="navigateNext()" *ngIf="navigateNext">siguiente</button>
+        </div>
+    </div>
+</section>

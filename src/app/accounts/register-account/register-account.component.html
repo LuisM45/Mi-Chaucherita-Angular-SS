@@ -1,0 +1,35 @@
+<section class="min-h-screen bg-primary">
+  <div class="flex flex-col min-h-screen lg:w-2/5 mx-auto bg-secondary p-4">
+    <div class="flex flex-col  lg:flex-row w-full lg:gap-4 ">
+      <div class="flex mx-auto">
+        <img src="assets/cuenta.jpg" alt="icono de perfil" class=" rounded-full lg:w-36">
+      </div>
+    </div>
+
+    <div>
+      <div class="flex flex-col  gap-5 px-4 py-6">
+        <div class="flex flex-col ">
+          <label class="text-base" for="password">Nombre de la cuenta</label>
+          <input class="p-2 rounded-md w-full" type="text" name=" accountName">
+        </div>
+
+        <div class="flex flex-col">
+          <label class="text-base" for="passwordC">Tipo de cuenta</label>
+          <select id="account" class="p-2 rounded-md" name="typeAccount">
+            <option *ngFor="let account of typesAccount" [value]="account">{{ account }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class=" flex flex-row w-full px-4 justify-between pt-4 lg:pt-52">
+      <button routerLink="../dashboard" class="button2 shadow-md shadow-primary">
+        Regresar
+      </button>
+      <button class="button">
+        Guardar
+      </button>
+    </div>
+
+  </div>
+</section>

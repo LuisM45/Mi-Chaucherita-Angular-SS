@@ -1,21 +1,52 @@
-<p>transaction-table works!</p>
-<table>
-    <thead>
-        <tr>
-            <th (click)="touchTitle()">Title</th>
-            <th (click)="touchAmount()">Amount</th>
-            <th (click)="touchDatetime()">Datetime</th>
-            <th (click)="touchDescription()">Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let t of response.results">
-            <td style="color: blue;" (click)="viewTransaction(t.id,t.data)">{{ t.data.title }}</td>
-            <td>{{ t.data.amount }}</td>
-            <td>{{ t.data.timeOfTransaction }}</td>
-            <td>{{ t.data.description }}</td>
-        </tr>
-    </tbody>
-</table>
-<li style="color: blue;" (click)="navigateNext()" >next</li>
-<li style="color: blue;" (click)="navigatePrevious()" >previous</li>
+<!-- <div>
+    <table class="w-full">
+        <thead>
+            <tr>
+                <th (click)="touchTitle()">Title</th>
+                <th (click)="touchAmount()">Amount</th>
+                <th (click)="touchDatetime()">Datetime</th>
+                <th (click)="touchDescription()">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let t of response.results">
+                <td style="color: blue;" (click)="viewTransaction(t.id,t.data)">{{ t.data.title }}</td>
+                <td>{{ t.data.amount }}</td>
+                <td>{{ t.data.timeOfTransaction }}</td>
+                <td>{{ t.data.description }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <li style="color: blue;" (click)="navigateNext()">next</li>
+    <li style="color: blue;" (click)="navigatePrevious()">previous</li>
+</div> -->
+
+<div class="overflow-x-auto">
+    <table class="w-full ">
+        <thead>
+            <tr class="text-primary ">
+                <th (click)="touchTitle()" class="py-2 cursor-pointer">Motivo</th>
+                <th (click)="touchAmount()" class="py-2 cursor-pointer">Monto</th>
+                <th (click)="touchDatetime()" class="py-2 cursor-pointer">Fecha</th>
+                <th (click)="touchDescription()" class="py-2 cursor-pointer">Descripcion</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ng-container *ngFor="let t of response.results; let i = index">
+                <tr (click)="viewTransaction(t.id, t.data)"
+                    class="text-center cursor-pointer transition-colors duration-300 hover:bg-primary hover:text-white border-primary border">
+                    <td class="py-2">{{ t.data.title }}</td>
+                    <td class="py-2">{{ t.data.amount }}</td>
+                    <td class="py-2">{{ t.data.timeOfTransaction }}</td>
+                    <td class="py-2">{{ t.data.description }}</td>
+                </tr>
+            </ng-container>
+        </tbody>
+    </table>
+    <div class="flex justify-center gap-4 mt-4">
+        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-80"
+            (click)="navigatePrevious()">Previous</button>
+        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-80"
+            (click)="navigateNext()">Next</button>
+    </div>
+</div>

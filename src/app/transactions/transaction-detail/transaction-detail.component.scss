@@ -1,0 +1,65 @@
+.button {
+  background-color: #26284a;
+  border: none;
+  color: white;
+  padding: 3px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  width: 25%;
+}
+
+
+.button:hover {
+  background-color: #3b3d6f;
+}
+
+/* Estilo para el botón de Eliminar */
+.delete-button {
+  background-color: #FF5252;
+  /* Color de fondo rojo */
+  color: #FFFFFF;
+  /* Color del texto blanco */
+  padding: 10px;
+  /* Espaciado interno */
+  border: none;
+  /* Sin borde */
+  border-radius: 4px;
+  /* Bordes redondeados */
+  cursor: pointer;
+  /* Cambia el cursor al pasar el mouse */
+  transition: background-color 0.3s, color 0.3s;
+  /* Transición suave */
+  font-size: 16px;
+  /* Tamaño de fuente */
+}
+
+.delete-button:hover {
+  background-color: #E53935;
+  /* Color de fondo rojo oscuro al pasar el mouse */
+}
+
+/* Estilo para el botón de Editar */
+.edit-button {
+  background-color: #1976D2;
+  /* Color de fondo azul */
+  color: #FFFFFF;
+  /* Color del texto blanco */
+  padding: 10px;
+  /* Espaciado interno */
+  border: none;
+  /* Sin borde */
+  border-radius: 4px;
+  /* Bordes redondeados */
+  cursor: pointer;
+  /* Cambia el cursor al pasar el mouse */
+  transition: background-color 0.3s, color 0.3s;
+  /* Transición suave */
+  font-size: 16px;
+  /* Tamaño de fuente */
+}
+
+.edit-button:hover {
+  background-color: #1565C0;
+  /* Color de fondo azul oscuro al pasar el mouse */
+}

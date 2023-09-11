@@ -4,18 +4,23 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { RouterModule } from '@angular/router';
 import { authGuard } from '../guard/auth.guard';
+import { AccountsModule } from '../accounts/accounts.module';
+
+
+
 
 
 
 @NgModule({
   declarations: [
-    DashboardComponent
+    DashboardComponent,
   ],
   imports: [
     CommonModule,
     TransactionsModule,
+    AccountsModule,
     RouterModule.forChild([
-      {path:"dashboard", component:DashboardComponent, canActivate: [authGuard]}
+      { path: "dashboard", component: DashboardComponent, canActivate: [authGuard] }
     ])
   ]
 })
