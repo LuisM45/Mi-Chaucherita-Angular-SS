@@ -11,8 +11,11 @@ import { dateStringToDate, toLocalStringUpToMinute } from 'src/app/shared/utils'
 })
 export class TransactionEditComponent implements OnInit{
 
+  
   id: string = ""
+  accountId: string = ""
   transaction:Transaction = {
+    id: "",
     title: "",
     amount: 0,
     timeOfTransaction: new Date(),
@@ -22,8 +25,9 @@ export class TransactionEditComponent implements OnInit{
   ngOnInit(): void {
     this.activatedRoute.paramMap.subscribe(pm=>{
       this.id = pm.get("id")!!
+      this.accountId = pm.get("accountId")!!
       
-    this.transactionService.getTransaction(this.id)
+    this.transactionService.getTransaction(this.accountId,this.id)
         .then(t=>this.transaction=t.results[0].data)
     })
   }
@@ -49,9 +53,12 @@ export class TransactionEditComponent implements OnInit{
   ){  }
 
   update(){
-    this.transactionService.updateTransaction(this.id,
+    this.transactionService.updateTransaction(
+      this.accountId,
+      this.id,
       this.transaction
-    ).then(a=>{this.router.navigate(['dashboard'])})
+    ).then(a=>{this.router.navigate(['/','transaction','view',this.accountId,this.id])})
+    .catch(console.log)
    console.log(this.transaction) 
   }
 

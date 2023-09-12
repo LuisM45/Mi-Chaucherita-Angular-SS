@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { authGuard } from '../guard/auth.guard';
 import { TransactionEditComponent } from './transaction-edit/transaction-edit.component';
+import { TransactionTableInnerComponent } from './transaction-table-inner/transaction-table-inner.component';
 
 
 
@@ -15,21 +16,23 @@ import { TransactionEditComponent } from './transaction-edit/transaction-edit.co
     RegisterTransactionComponent,
     TransactionDetailComponent,
     TransactionTableComponent,
-    TransactionEditComponent
+    TransactionEditComponent,
+    TransactionTableInnerComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     RouterModule.forChild([
-      {path:"transaction/register" , component: RegisterTransactionComponent, canActivate: [authGuard]},
-      {path:"transaction/view/:id" , component: TransactionDetailComponent, canActivate: [authGuard]},
-      {path:"transaction/edit/:id" , component: TransactionEditComponent, canActivate: [authGuard]},
+      {path:"transaction/register/:accountId" , component: RegisterTransactionComponent, canActivate: [authGuard]},
+      {path:"transaction/view/:accountId/:id" , component: TransactionDetailComponent, canActivate: [authGuard]},
+      {path:"transaction/edit/:accountId/:id" , component: TransactionEditComponent, canActivate: [authGuard]},
       {path:"transaction/table" , component: TransactionTableComponent, canActivate: [authGuard]},
     ])
   ],
   exports:[
     TransactionDetailComponent,
-    TransactionTableComponent
+    TransactionTableComponent,
+    TransactionTableInnerComponent
   ]
 })
 export class TransactionsModule { }

@@ -22,14 +22,19 @@
     <div class="flex flex-col-reverse md:flex-row justify-between px-12 ">
       <p class="text-base">Los untimos 30 dias </p>
       <div>
-        <button routerLink="/transaction/register" class="button">
+        <button class="delete-button" (click)="delete()">
+        Borrar
+        </button>
+      </div>
+      <div>
+        <button routerLink="/transaction/register/{{ accountId }}" class="button">
           Nuevo movimiento
         </button>
       </div>
     </div>
     <!-- Lista de movimientos -->
     <div class="md:mx-12 mt-5 bg-white rounded-md shadow-md shadow-primary p-2 md:h-[280px] ">
-      <app-transaction-table></app-transaction-table>
+      <app-transaction-table-inner [accountId]="accountId"></app-transaction-table-inner>
     </div>
   </div>
 

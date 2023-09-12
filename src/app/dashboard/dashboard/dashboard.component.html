@@ -39,7 +39,7 @@
 
     </div>
     <div class="w-3/4 mx-auto">
-      <button class="button ">Ver Movimientos</button>
+      <button class="button " routerLink="/transaction/table">Ver Movimientos</button>
     </div>
   </aside>
 
@@ -126,9 +126,14 @@
     <div class="px-2  lg:px-10 py-4 lg:py-8 grid justify-center md:grid-cols-2 max-h-[544px] overflow-y-auto  ">
       <!-- Renderizar la tarjetas -->
       <div *ngFor="let account of accounts" class="mb-8 hover:scale-105 transition hover:cursor-pointer">
-        <app-account-card [accountId]="account.id" [accountName]="account.name" [accountBalance]="account.balance"
-          [accountType]="account.type" [lastTransactionReason]="account.lastTransactionReason"
-          [transactionCount]="account.transactionCount" [imageUrl]="account.imageUrl"></app-account-card>
+        <app-account-card
+          [accountId]="account.id!!"
+          [accountName]="account.name"
+          [accountType]="account.type"
+          [imageUrl]="''"
+          [accountBalance]="account.currentValue"
+          [transactionCount]="account.registerCount">
+        </app-account-card>
       </div>
     </div>
   </article>

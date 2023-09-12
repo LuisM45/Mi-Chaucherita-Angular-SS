@@ -21,32 +21,4 @@
     <li style="color: blue;" (click)="navigatePrevious()">previous</li>
 </div> -->
 
-<div class="overflow-x-auto">
-    <table class="w-full ">
-        <thead>
-            <tr class="text-primary ">
-                <th (click)="touchTitle()" class="py-2 cursor-pointer">Motivo</th>
-                <th (click)="touchAmount()" class="py-2 cursor-pointer">Monto</th>
-                <th (click)="touchDatetime()" class="py-2 cursor-pointer">Fecha</th>
-                <th (click)="touchDescription()" class="py-2 cursor-pointer">Descripcion</th>
-            </tr>
-        </thead>
-        <tbody>
-            <ng-container *ngFor="let t of response.results; let i = index">
-                <tr (click)="viewTransaction(t.id, t.data)"
-                    class="text-center cursor-pointer transition-colors duration-300 hover:bg-primary hover:text-white border-primary border">
-                    <td class="py-2">{{ t.data.title }}</td>
-                    <td class="py-2">{{ t.data.amount }}</td>
-                    <td class="py-2">{{ t.data.timeOfTransaction }}</td>
-                    <td class="py-2">{{ t.data.description }}</td>
-                </tr>
-            </ng-container>
-        </tbody>
-    </table>
-    <div class="flex justify-center gap-4 mt-4">
-        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-80"
-            (click)="navigatePrevious()">Previous</button>
-        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-80"
-            (click)="navigateNext()">Next</button>
-    </div>
-</div>
+<app-transaction-table-inner></app-transaction-table-inner>

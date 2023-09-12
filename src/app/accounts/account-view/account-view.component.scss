@@ -9,6 +9,36 @@
   width: 100%;
 }
 
+.button {
+  background-color: #26284a;
+  border: none;
+  color: white;
+  padding: 6px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 10px;
+  width: 100%;
+}
+
 .button:hover {
   background-color: #3b3d6f;
+}
+
+.delete-button {
+  background-color: #FF5252;
+  /* Color de fondo rojo */
+  color: #FFFFFF;
+  /* Color del texto blanco */
+  padding: 10px;
+  /* Espaciado interno */
+  border: none;
+  /* Sin borde */
+  border-radius: 4px;
+  /* Bordes redondeados */
+  cursor: pointer;
+  /* Cambia el cursor al pasar el mouse */
+  transition: background-color 0.3s, color 0.3s;
+  /* Transición suave */
+  font-size: 16px;
+  /* Tamaño de fuente */
 }

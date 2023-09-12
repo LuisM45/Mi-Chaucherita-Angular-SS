@@ -24,7 +24,7 @@ export class TransactionDetailComponent {
     return this.response.results[0].data
   }
 
-  
+  public accountId:string | undefined
   public id:string | undefined
 
   constructor(
@@ -40,6 +40,7 @@ export class TransactionDetailComponent {
   subscription: Subscription | undefined
   private subscribeFun = (params:ParamMap) =>{
     this.id = params.get("id")!!
+    this.accountId = params.get("accountId")!!
     this.cache.get<Transaction>(this.id!!)
       .then(r=>this.response.results.push({id:this.id!!,data:r}))
       .catch(_=>{})
@@ -53,7 +54,7 @@ export class TransactionDetailComponent {
   
 
   desubscribeRouter(){
-    this.subscription?.unsubscribe()
+    // this.subscription?.unsubscribe()
   }
 
   resubscribeRouter(){
@@ -62,7 +63,7 @@ export class TransactionDetailComponent {
   
 
   loadTransactionData(id: string, constraints: QueryConstraint[]){
-    this.transactions.getTransaction1(id,constraints)
+    this.transactions.getTransaction1(this.accountId!!,id,constraints)
     .then( i=>{
       this.response = i
       this.prepareNavigation()
@@ -104,8 +105,9 @@ export class TransactionDetailComponent {
   navigatePrevious: (()=>void) | undefined   = undefined
 
   delete() {
-    this.transactions.deleteTransaction(this.id!!).then(t=>{
-      this.router.navigate(["dashboard"])
+    this.transactions.deleteTransaction(this.accountId!!,this.id!!)
+    .then(t=>{
+      this.router.navigate(['/','account-view',this.accountId])
     })
   }
 }

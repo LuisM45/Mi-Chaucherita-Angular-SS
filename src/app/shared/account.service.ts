@@ -1,4 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { UserService } from './user.service';
+import { Firestore } from '@angular/fire/firestore';
+import { DocumentReference, addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from '@firebase/firestore';
+import { DocumentData } from '@firebase/firestore-types';
+import { Account } from '../interfaces/accout.interface';
+import { PromiseHolder } from '../classes/PromiseHolder.class';
+import { parseDocToAccount, sanitizeAccount } from './utils';
+import { Transaction } from '../interfaces/transaction.interface';
+import { TransactionsService } from './transactions.service';
 
 @Injectable({
   providedIn: 'root'
@@ -28,14 +37,59 @@ export class AccountService {
 
     // Agrega más cuentas aquí...
   ];
+  
+  get contextCol(){
+    return this._contextCol
+  }
+  private _contextCol
 
-  constructor() { }
+  constructor(
+    private userService:UserService,
+    private firestoreNew: Firestore = inject(Firestore),
+    ) {
+      this._contextCol = collection(this.firestoreNew,"transactions",this.userService.currentUser?.uid!!,"account")
+    }
 
-  getAllAccounts() {
-    return this.accounts;
+  createAccount(account:Account):Promise<string>{
+    return new PromiseHolder(addDoc(this.contextCol,account))
+      .pipe( docSnap=> docSnap.id)
+      .promise
   }
 
-  getAccountDetails(accountId: number) {
+  getAllAccounts():Promise<Account[]> {
+      return new PromiseHolder(getDocs(this.contextCol))
+        .pipe( snapshot=>  snapshot.docs.map(parseDocToAccount) )
+        .promise
+  }
+
+  getAccount(id:string):Promise<Account> {
+    const document = doc(this.contextCol,id)
+    return new PromiseHolder(getDoc(document))
+      .pipe( parseDocToAccount )
+      .promise
+  }
+
+  updateAccountAsWhole(account:Account):Promise<Account> {    
+    const _account = {...account}
+    
+    return this.updateAccount(_account.id!!,_account)
+  }
+
+  updateAccount(id:string,account:Account):Promise<Account> {
+    console.log("with id")
+    const document = doc(this.contextCol,id)
+    console.log("update")
+    return new PromiseHolder(setDoc(document,sanitizeAccount(account)))
+      .pipe(_=>account)
+      .promise
+  }
+
+  deleteAccount(id:string):Promise<void> {
+    const document = doc(this.contextCol,id)
+    return deleteDoc(document)
+  }
+
+  getAccountDetails(accountId: string) {
     // Busca la cuenta por id en el arreglo de cuentas
     return this.accounts.find(acc => acc.id === +accountId);
   }

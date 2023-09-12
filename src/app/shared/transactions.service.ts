@@ -5,17 +5,30 @@ import { Firestore } from '@angular/fire/firestore';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { UserService } from './user.service';
 import { DocumentReference, DocumentSnapshot, QueryConstraint, addDoc, collection, deleteDoc, doc, endBefore, getDoc, getDocs, limit, limitToLast, orderBy, query, setDoc, startAfter, startAt } from 'firebase/firestore';
-import { parseDocToTransaction } from './utils';
+import { flattenPromise, parseDocToAccount, parseDocToTransaction, sanitizeTransaction, toBigPromise } from './utils';
 import { CacheService } from './cache.service';
+import { AccountService } from './account.service';
+import { PromiseHolder } from '../classes/PromiseHolder.class';
+import * as e from 'cors';
+import { Account } from '../interfaces/accout.interface';
 
 
-const PAGE_SIZE = 3
+const PAGE_SIZE = 100
 @Injectable({
   providedIn: 'root'
 })
 export class TransactionsService {
 
+  getConextCol(accountRef:DocumentReference){
+    return collection(accountRef,"transactions")
+  }
+
+  getConextColById(accountId:string){
+    return collection(this.accountService.contextCol,accountId,"transactions")
+  }
+
   constructor(
+    private accountService: AccountService,
     private userService: UserService,
     private firestore: AngularFirestore,
     private firestoreNew: Firestore = inject(Firestore),
@@ -33,17 +46,19 @@ export class TransactionsService {
     return null
   }
 
-
-getTransaction(id:string):Promise<PagedQuery<Transaction>>{
-    return this.getTransaction1(id,[orderBy("timeOfTransaction","asc")])
+getTransactionOnly(accountId:string,id:string):Promise<Transaction>{
+  const d = doc(this.getConextColById(accountId),id)
+  return new PromiseHolder(getDoc(d))
+    .pipe(parseDocToTransaction)
+    .promise
 }
-getTransaction1(id:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
-  if(this.userService.currentUser?.uid==null) return Promise.reject()
-  const uid = this.userService.currentUser.uid!!
-  
 
+getTransaction(accountId:string,id:string):Promise<PagedQuery<Transaction>>{
+    return this.getTransaction1(accountId,id,[orderBy("timeOfTransaction","asc")])
+}
+getTransaction1(accountId:string,id:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
     return new Promise((resolve,reject)=>{
-      var document = doc(this.firestoreNew,`transactions`,uid,'transactions',id)
+      var document =  doc(this.getConextColById(accountId),id)
       getDoc(document)
       .then(docSnap=>{
         this.getTransaction2(docSnap,queryConstraints)
@@ -69,6 +84,7 @@ getTransaction2(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[]):Pr
 
   return Promise.resolve(result)
 }
+
 private lambdaNextTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[],oldResults:()=>PagedQuery<Transaction>):Promise<PagedQuery<Transaction>>{
   var q = query(snapshot.ref.parent,...queryConstraints,limit(1),startAfter(snapshot))
 
@@ -117,15 +133,30 @@ private lambdaPrevTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryCo
   })
 }
 
-getTransactionList():Promise<PagedQuery<Transaction>>{
-  return this.getTransactionList1([orderBy("timeOfTransaction","asc"),limit(PAGE_SIZE)])
+getAllTransactionList():Promise<PagedQuery<Transaction>>{
+  return this.getAllTransactionList1([])
 }
 
-getTransactionList1a(startId:string,endId:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
+getAllTransactionList1(queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
+  return new PromiseHolder(this.accountService.getAllAccounts())
+    .pipe(e=>e.map(i=>i.id!!))
+    .pipe(accountIds=>accountIds.map(i=>this.getTransactionList1(i,queryConstraints)))
+    .pipeFlat(toBigPromise)
+    .pipe(queries=>queries.map(e=>e.results))
+    .pipe(e=>Array.prototype.concat(...e))
+    .pipe(r=>{return{results: r}})
+    .promise
+}
+
+getTransactionList(accountId:string):Promise<PagedQuery<Transaction>>{
+  return this.getTransactionList1(accountId,[orderBy("timeOfTransaction","asc"),limit(PAGE_SIZE)])
+}
+
+getTransactionList1a(accountId:string,startId:string,endId:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
   if(this.userService.currentUser?.uid==null) return Promise.reject()
-  const uid = this.userService.currentUser.uid!!
-  var docStart = doc(this.firestoreNew,`transactions`,uid,'transactions',startId)
-  var docEnd = doc(this.firestoreNew,`transactions`,uid,'transactions',endId)
+  var col = this.getConextColById(accountId)
+  var docStart = doc(col,startId)
+  var docEnd = doc(col,endId)
 
   return new Promise((resolve,reject)=>{
     getDoc(docStart).then(snapStart =>{
@@ -138,14 +169,10 @@ getTransactionList1a(startId:string,endId:string,queryConstraints:QueryConstrain
   
 }
 
-getTransactionList1(queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
-  if(this.userService.currentUser?.uid==null) return Promise.reject()
-  const uid = this.userService.currentUser.uid!!
-  var col = collection(this.firestoreNew,`transactions`,uid,'transactions')
-  var q = query(col,...queryConstraints,limit(PAGE_SIZE))
 
+getTransactionList1(accountId:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
   return new Promise((resolve,reject)=>{
-    getDocs(q).then(docs=>{
+    getDocs(this.getConextColById(accountId)).then(docs=>{
       const firstDoc = docs.docs[0]
       const lastDoc = docs.docs[docs.size-1]
       if(docs.size == 0) {reject();return}
@@ -212,27 +239,61 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
   })
 }
 
-  updateTransaction(id:string,transaction: Transaction):Promise<void>{
-    if(this.userService.currentUser?.uid==null) return Promise.reject()
-    const uid = this.userService.currentUser.uid!!
-    const d = doc(this.firestoreNew,"transactions",uid,"transactions",id)
-    return setDoc(d,transaction)
+  getLastTransaction(accountId:string):Promise<Transaction | null>{
+    const q = query(this.getConextColById(accountId),orderBy("timeOfTransaction","desc"),limit(1))
+
+    return new PromiseHolder(getDocs(q))
+      .pipe(result=>{
+        if(result.size==0) return null
+        else return parseDocToTransaction(result.docs[0])
+      }).promise
+  }
+
+  updateTransaction(accountId:string,id:string,transaction: Transaction):Promise<Transaction>{
+    const d = doc(this.getConextColById(accountId),id)
+
+    return new PromiseHolder(this.getTransactionOnly(accountId,id))
+      .peek(_=>setDoc(d,sanitizeTransaction(transaction)))
+      .joinPromise(this.accountService.getAccount(accountId))
+      .pipe(results=>{
+        const delta = transaction.amount - results.first.amount
+        results.latter.currentValue += delta
+        console.log(results.latter)
+        return results.latter
+      })
+      .peek(t=>{this.accountService.updateAccountAsWhole(t)})
+      .pipe(_=>transaction)
+      .promise
   }
 
 
-  deleteTransaction(id:string):Promise<void>{
-    if(this.userService.currentUser?.uid==null) return Promise.reject()
-    const uid = this.userService.currentUser.uid!!
-    const d = doc(this.firestoreNew,"transactions",uid,"transactions",id)
-    return deleteDoc(d)
+  deleteTransaction(accountId:string,id:string):Promise<void>{
+    const d = doc(this.getConextColById(accountId),id)
+    return new PromiseHolder(this.getTransactionOnly(accountId,id))
+      .joinPromise(this.accountService.getAccount(accountId))
+      .pipe(results=>{
+        results.latter.registerCount -= 1
+        results.latter.currentValue -= results.first.amount
+        return results.latter
+      })
+      .peek(t=>{this.accountService.updateAccountAsWhole(t)})
+      .pipeFlat(_=>deleteDoc(d))
+      .promise
+      
+
 }
 
-  registerTransaction(transaction: Transaction): Promise<DocumentReference>{
-    if(this.userService.currentUser?.uid==null) return Promise.reject()
-    const uid = this.userService.currentUser.uid!!
-    const col = collection(this.firestoreNew,"transactions",uid,"transactions")
-
-    return addDoc(col,transaction)
+  registerTransaction(accountId:string,transaction: Transaction): Promise<DocumentReference>{
+    return new PromiseHolder(addDoc(this.getConextColById(accountId),transaction))
+      .joinPromise(this.accountService.getAccount(accountId))
+      .pipe(results=>{
+        results.latter.registerCount += 1
+        results.latter.currentValue += transaction.amount
+        return results
+      })
+      .peek(r=>this.accountService.updateAccountAsWhole(r.latter))
+      .pipe(r=>r.first)
+      .promise
 }
 
   getEarnings(queryTransaction: PagedQuery<Transaction>): number{

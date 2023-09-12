@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { QueryConstraint } from 'firebase/firestore';
 import { PagedQuery } from 'src/app/interfaces/query.interface';
@@ -12,59 +12,12 @@ import { TransactionsService } from 'src/app/shared/transactions.service';
   styleUrls: ['./transaction-table.component.scss']
 })
 export class TransactionTableComponent {
+  filterId = ""
 
-  queryConstraints:QueryConstraint[] = []
-  response: PagedQuery<Transaction> = {
-    results: []
-  }
-  constructor(
-    private transactionService: TransactionsService,
-    private cache: CacheService,
-    private router: Router
-  ){
-    transactionService.getTransactionList1([]).then(tl=>{
-      console.log("svc response")
-      console.log(tl)
-      this.response = tl
-    }).catch(e=>console.log(e))
-  }
-
-  touchDescription() {
-    throw new Error('Method not implemented.');
-  }
-
-  touchDatetime() {
-    throw new Error('Method not implemented.');
-  }
-
-  touchAmount() {
-    throw new Error('Method not implemented.');
-  }
-
-  touchTitle() {
-    throw new Error('Method not implemented.');
-  }
-
-  reload(){
-
-  }
-
-  viewTransaction(id:string,transaction:Transaction){
-    this.cache.set(id,transaction)
-    this.router.navigate(['/','transaction','view',id])
-  }
-
-  navigatePrevious() {
-    if(!this.response.prevPage) return
-    this.response.prevPage().then(page=>{
-      this.response = page
-    })
-  }
-
-  navigateNext() {
-    if(!this.response.nextPage) return
-    this.response.nextPage().then(page=>{
-      this.response = page
-    })
-  }
+constructor(
+  private transactionService: TransactionsService,
+  private cache: CacheService,
+  private router: Router
+){
+}
 }

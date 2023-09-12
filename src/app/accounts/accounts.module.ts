@@ -5,6 +5,7 @@ import { RegisterAccountComponent } from './register-account/register-account.co
 import { RouterModule } from '@angular/router';
 import { AccountViewComponent } from './account-view/account-view.component';
 import { TransactionsModule } from '../transactions/transactions.module';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -14,6 +15,7 @@ import { TransactionsModule } from '../transactions/transactions.module';
   ],
   imports: [
     CommonModule,
+    FormsModule,
     TransactionsModule,
     RouterModule.forChild([
       { path: "register-account", component: RegisterAccountComponent },

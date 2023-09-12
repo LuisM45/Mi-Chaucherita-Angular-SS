@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PromiseHolder } from 'src/app/classes/PromiseHolder.class';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
 import { TransactionsService } from 'src/app/shared/transactions.service';
 import { dateStringToDate, toLocalStringUpToMinute } from 'src/app/shared/utils';
@@ -10,6 +11,7 @@ import { dateStringToDate, toLocalStringUpToMinute } from 'src/app/shared/utils'
   styleUrls: ['./register-transaction.component.scss']
 })
 export class RegisterTransactionComponent {
+  accountId?: string
   title: string = ""
   amount: number = 0
   datetime: string = toLocalStringUpToMinute(new Date())
@@ -17,9 +19,12 @@ export class RegisterTransactionComponent {
 
   constructor(
     public transactionService: TransactionsService,
-    public router:Router
+    public router:Router,
+    public activatedRoute:ActivatedRoute
   ){
-
+    activatedRoute.paramMap.subscribe( pm=> {
+      this.accountId = pm.get("accountId")!!
+    })
     console.log(this.datetime)
   }
 
@@ -32,9 +37,9 @@ export class RegisterTransactionComponent {
     }
 
     this.transactionService.registerTransaction(
+      this.accountId!!,
       transaction 
-    ).then(a=>{this.router.navigate(['dashboard'])})
-   console.log(transaction) 
+    ).then(a=>{this.router.navigate(['/','account-view',this.accountId]);console.log(a.id)})
   }
   
 }

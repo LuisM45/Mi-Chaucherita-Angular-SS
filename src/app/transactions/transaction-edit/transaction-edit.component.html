@@ -8,7 +8,7 @@
 <section class="min-h-screen bg-primary">
   <div class="flex flex-col min-h-screen lg:w-2/5 mx-auto bg-secondary p-4">
     <div class="px-5">
-      <h1 class="text-2xl font-semibold mb-4">Registrar Transacción</h1>
+      <h1 class="text-2xl font-semibold mb-4">Editar Transacción</h1>
       <form>
         <div class="mb-4">
           <label for="title" class="block text-gray-600">Título:</label>
@@ -37,9 +37,9 @@
         </div>
 
         <div class="flex flex-row w-full justify-between px-20">
-          <button class="button2">Cancelar</button>
+          <button class="button2" [routerLink]='["/","account-view",accountId]'>Cancelar</button>
 
-          <button (click)="update()" class="button">Registrar</button>
+          <button (click)="update()" class="button">Editar</button>
         </div>
       </form>
     </div>
