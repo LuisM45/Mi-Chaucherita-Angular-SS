@@ -7,7 +7,7 @@
 /bazel-out
 
 # Node
-/node_modules
+/node_modules/*
 !/node_modules/rxfire/firestore/lite/interfaces.d.ts
 !/node_modules/@angular/fire/compat/firestore/interfaces.d.ts
 npm-debug.log
