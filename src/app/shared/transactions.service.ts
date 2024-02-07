@@ -5,12 +5,13 @@ import { Firestore } from '@angular/fire/firestore';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { UserService } from './user.service';
 import { DocumentReference, DocumentSnapshot, QueryConstraint, addDoc, collection, deleteDoc, doc, endBefore, getDoc, getDocs, limit, limitToLast, orderBy, query, setDoc, startAfter, startAt } from 'firebase/firestore';
-import { flattenPromise, parseDocToAccount, parseDocToTransaction, sanitizeTransaction, toBigPromise } from './utils';
+import { DocumentEncryptor, flattenPromise, parseDocToAccount, sanitizeTransaction, toBigPromise } from './utils';
 import { CacheService } from './cache.service';
 import { AccountService } from './account.service';
 import { PromiseHolder } from '../classes/PromiseHolder.class';
 import * as e from 'cors';
 import { Account } from '../interfaces/accout.interface';
+import { EncryptionService } from './encryption.service';
 
 
 const PAGE_SIZE = 100
@@ -27,13 +28,18 @@ export class TransactionsService {
     return collection(this.accountService.contextCol,accountId,"transactions")
   }
 
+  private documentEncryptor: DocumentEncryptor;
   constructor(
     private accountService: AccountService,
     private userService: UserService,
     private firestore: AngularFirestore,
     private firestoreNew: Firestore = inject(Firestore),
-    private cache:CacheService
-    ) { }
+    private cache:CacheService,
+    private encSvc:EncryptionService,
+    ) { 
+      this.documentEncryptor = new DocumentEncryptor(encSvc)
+
+    }
 
   getTransactions(max: number, filter:any ): PagedQuery<Transaction>{
     // TODO
@@ -49,7 +55,8 @@ export class TransactionsService {
 getTransactionOnly(accountId:string,id:string):Promise<Transaction>{
   const d = doc(this.getConextColById(accountId),id)
   return new PromiseHolder(getDoc(d))
-    .pipe(parseDocToTransaction)
+    .pipe(this.documentEncryptor.cipherdocToTransaction)
+    .pipeFlat(e=>e)
     .promise
 }
 
@@ -71,8 +78,8 @@ getTransaction1(accountId:string,id:string,queryConstraints:QueryConstraint[]):P
 
 
 
-getTransaction2(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
-  var transaction = parseDocToTransaction(snapshot)
+async getTransaction2(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
+  var transaction = await this.documentEncryptor.cipherdocToTransaction(snapshot)
   this.cache.set(snapshot.id,transaction)
   var result:PagedQuery<Transaction> = {
     results: [{id:snapshot.id, data:transaction}],
@@ -85,16 +92,16 @@ getTransaction2(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[]):Pr
   return Promise.resolve(result)
 }
 
-private lambdaNextTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[],oldResults:()=>PagedQuery<Transaction>):Promise<PagedQuery<Transaction>>{
+private async  lambdaNextTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[],oldResults:()=>PagedQuery<Transaction>):Promise<PagedQuery<Transaction>>{
   var q = query(snapshot.ref.parent,...queryConstraints,limit(1),startAfter(snapshot))
 
   return new Promise((resolve,reject)=>{
     getDocs(q)
-    .then(docs=>{
+    .then(async docs=>{
       if(docs.size==0) {reject();return}
       const _doc = docs.docs[0]
 
-      var transaction = parseDocToTransaction(_doc)
+      var transaction = await this.documentEncryptor.cipherdocToTransaction(_doc)
       this.cache.set(_doc.id,transaction)
       var result:PagedQuery<Transaction> = {
         results: [{id:_doc.id, data:transaction}],
@@ -109,15 +116,15 @@ private lambdaNextTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryCo
   })
 }
 
-private lambdaPrevTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[],oldResults:()=>PagedQuery<Transaction>):Promise<PagedQuery<Transaction>>{
+private async lambdaPrevTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryConstraint[],oldResults:()=>PagedQuery<Transaction>):Promise<PagedQuery<Transaction>>{
   var q = query(snapshot.ref.parent,...queryConstraints,limitToLast(1),endBefore(snapshot))
 
   return new Promise((resolve,reject)=>{
     getDocs(q)
-    .then(docs=>{
+    .then(async docs=>{
       if(docs.size==0) {reject();return}
       const _doc = docs.docs[0]
-      var transaction = parseDocToTransaction(_doc)
+      var transaction = await this.documentEncryptor.cipherdocToTransaction(_doc)
       this.cache.set(_doc.id,transaction)
       var result:PagedQuery<Transaction> = {
         results: [{id:_doc.id, data:transaction}],
@@ -125,7 +132,7 @@ private lambdaPrevTransaction(snapshot:DocumentSnapshot,queryConstraints:QueryCo
       }
       result.prevPage = ()=>this.lambdaPrevTransaction(_doc,queryConstraints,()=>result)
 
-      result.results = docs.docs.map(d=>{return{id:d.id,data:parseDocToTransaction(d)}})
+      result.results = await toBigPromise(docs.docs.map(async d=>{return{id:d.id,data: await this.documentEncryptor.cipherdocToTransaction(d)}}))
       resolve(result)
     }).catch(e=>
       reject(e)
@@ -172,12 +179,12 @@ getTransactionList1a(accountId:string,startId:string,endId:string,queryConstrain
 
 getTransactionList1(accountId:string,queryConstraints:QueryConstraint[]):Promise<PagedQuery<Transaction>>{
   return new Promise((resolve,reject)=>{
-    getDocs(this.getConextColById(accountId)).then(docs=>{
+    getDocs(this.getConextColById(accountId)).then(async docs=>{
       const firstDoc = docs.docs[0]
       const lastDoc = docs.docs[docs.size-1]
       if(docs.size == 0) {reject();return}
       var result: PagedQuery<Transaction> ={
-        results: docs.docs.map(d=>{return {id:d.id, data:parseDocToTransaction(d)}}),
+        results: await toBigPromise(docs.docs.map(async d=>{return {id:d.id, data: await this.documentEncryptor.cipherdocToTransaction(d)}})),
         prevPage: ()=>this.getPrevTransactionListPromise(firstDoc,queryConstraints,()=>result),
         nextPage: ()=>this.getNextTransactionListPromise(lastDoc,queryConstraints,()=>result)
       }
@@ -191,12 +198,12 @@ getTransactionList2(firstSnapshot:DocumentSnapshot,lastSnapshot:DocumentSnapshot
 var q = query(lastSnapshot.ref.parent,...queryConstraints,startAfter(firstSnapshot),endBefore(lastSnapshot))
 
 return new Promise((resolve,reject)=>{
-  getDocs(q).then(docs=>{
+  getDocs(q).then(async docs=>{
     const firstDoc = docs.docs[0]
         const lastDoc = docs.docs[docs.size-1]
         if(docs.size == 0) {reject();return}
         var result: PagedQuery<Transaction> ={
-          results: docs.docs.map(d=>{return {id:d.id, data:parseDocToTransaction(d)}}),
+          results: await toBigPromise(docs.docs.map(async d=>{return {id:d.id, data: await this.documentEncryptor.cipherdocToTransaction(d)}})),
           prevPage: ()=>this.getPrevTransactionListPromise(firstDoc,queryConstraints,()=>result),
           nextPage: ()=>this.getNextTransactionListPromise(lastDoc,queryConstraints,()=>result)
         }
@@ -209,11 +216,11 @@ getNextTransactionListPromise(lastSnapshot:DocumentSnapshot,queryConstraints:Que
 var q = query(lastSnapshot.ref.parent,...queryConstraints,startAfter(lastSnapshot),limit(PAGE_SIZE))
 
   return new Promise((resolve,reject)=>{
-    getDocs(q).then(docs=>{ 
+    getDocs(q).then(async docs=>{ 
       const lastDoc = docs.docs[docs.size-1]
       if(docs.size == 0) {reject();return}
       var result: PagedQuery<Transaction> ={
-        results: docs.docs.map(d=>{return {id:d.id, data:parseDocToTransaction(d)}}),
+        results: await toBigPromise(docs.docs.map(async d=>{return {id:d.id, data: await this.documentEncryptor.cipherdocToTransaction(d)}})),
         prevPage: ()=>Promise.resolve(oldResults()),
         nextPage: ()=>this.getNextTransactionListPromise(lastDoc,queryConstraints,()=>result)
       }
@@ -226,11 +233,11 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
   var q = query(firstSnapshot.ref.parent,...queryConstraints,endBefore(firstSnapshot),limitToLast(PAGE_SIZE))
 
   return new Promise((resolve,reject)=>{
-    getDocs(q).then(docs=>{
+    getDocs(q).then(async docs=>{
       const firstDoc = docs.docs[0]
       if(docs.size == 0) {reject();return}
       var result: PagedQuery<Transaction> ={
-        results: docs.docs.map(d=>{return {id:d.id, data:parseDocToTransaction(d)}}),
+        results: await toBigPromise(docs.docs.map(async d=>{return {id:d.id, data: await this.documentEncryptor.cipherdocToTransaction(d)}})),
         nextPage: ()=>Promise.resolve(oldResults()),
         prevPage: ()=>this.getPrevTransactionListPromise(firstDoc,queryConstraints,()=>result)
       }
@@ -239,13 +246,13 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
   })
 }
 
-  getLastTransaction(accountId:string):Promise<Transaction | null>{
+  async getLastTransaction(accountId:string):Promise<Transaction | null>{
     const q = query(this.getConextColById(accountId),orderBy("timeOfTransaction","desc"),limit(1))
 
-    return new PromiseHolder(getDocs(q))
-      .pipe(result=>{
+    return await new PromiseHolder(getDocs(q))
+      .pipe(async result=>{
         if(result.size==0) return null
-        else return parseDocToTransaction(result.docs[0])
+        else return await this.documentEncryptor.cipherdocToTransaction(result.docs[0])
       }).promise
   }
 
@@ -253,12 +260,11 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
     const d = doc(this.getConextColById(accountId),id)
 
     return new PromiseHolder(this.getTransactionOnly(accountId,id))
-      .peek(_=>setDoc(d,sanitizeTransaction(transaction)))
+      .peek(_=>setDoc(d,this.documentEncryptor.transactionToCipherobj(transaction)))
       .joinPromise(this.accountService.getAccount(accountId))
       .pipe(results=>{
         const delta = transaction.amount - results.first.amount
         results.latter.currentValue += delta
-        console.log(results.latter)
         return results.latter
       })
       .peek(t=>{this.accountService.updateAccountAsWhole(t)})
@@ -283,8 +289,11 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
 
 }
 
-  registerTransaction(accountId:string,transaction: Transaction): Promise<DocumentReference>{
-    return new PromiseHolder(addDoc(this.getConextColById(accountId),transaction))
+  async registerTransaction(accountId:string,transaction: Transaction): Promise<DocumentReference>{
+    let cryptObj = this.documentEncryptor.transactionToCipherobj(transaction)
+    return new PromiseHolder(
+        addDoc(this.getConextColById(accountId),await cryptObj)
+      )
       .joinPromise(this.accountService.getAccount(accountId))
       .pipe(results=>{
         results.latter.registerCount += 1

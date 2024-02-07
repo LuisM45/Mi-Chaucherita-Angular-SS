@@ -1,9 +1,10 @@
 import { ActivatedRoute } from "@angular/router"
-import { DocumentSnapshot, OrderByDirection, QueryConstraint, Timestamp, WhereFilterOp, orderBy, where } from "firebase/firestore"
+import { DocumentSnapshot, OrderByDirection, QueryConstraint, Timestamp, WhereFilterOp, addDoc, orderBy, where } from "firebase/firestore"
 import { Transaction } from "../interfaces/transaction.interface"
 import { Account } from "../interfaces/accout.interface"
 import { PromiseHolder } from "../classes/PromiseHolder.class"
 import { Subscription } from "rxjs"
+import { EncryptionService } from "./encryption.service"
 
 
 export function toLocalStringUpToMinute(date: Date):string{
@@ -76,6 +77,41 @@ export function getQueryConstraints(route:ActivatedRoute):Promise<QueryConstrain
     //value.transactions // TODO: Possibly will need to define
     return value
   }
+
+export class DocumentEncryptor{
+  constructor(private encryptSvc: EncryptionService){}
+  private sencrypt(plaintext:string){return this.encryptSvc.symmetricEncryption(plaintext)}
+  private sdecrypt(ciphertext:string){return this.encryptSvc.symmetricDecryption(ciphertext)}
+
+  async cipherdocToTransaction(documentSnapshot:DocumentSnapshot): Promise<Transaction>{
+    const data = documentSnapshot.data()!
+
+    return {
+      account: ()=>documentSnapshot.ref,
+      id: documentSnapshot.id,
+      title: await this.sdecrypt(data['title']),
+      amount: Number(await this.sdecrypt(data['amount'])),
+      timeOfTransaction: (data!!['timeOfTransaction'] as Timestamp).toDate(),
+      description: await this.sdecrypt(data['description']),
+    }
+  }
+
+  cipherdocToAccount(documentSnapshot:DocumentSnapshot){
+  }
+
+  async transactionToCipherobj(transaction: Transaction): Promise<any>{
+    return {
+      title: await this.sencrypt(transaction.title),
+      amount: await this.sencrypt(transaction.amount.toString()),
+      timeOfTransaction: transaction.timeOfTransaction,
+      description: await this.sencrypt(transaction.description)
+    }
+  }
+  
+  accountToCipherobj(): any{
+    return null
+  }
+}
 
   export function toBigPromise<F>(promises:Promise<F>[]):Promise<(F)[]>{
     if(promises.length==0) return Promise.resolve([])

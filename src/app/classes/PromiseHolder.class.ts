@@ -12,6 +12,11 @@ export class PromiseHolder<E>{
         this._promise.then(e=>fun(e))
         return this
     }
+    
+    peekCatch(fun:(reason:any)=>any):PromiseHolder<E>{
+        this._promise.catch(e=>fun(e))
+        return this
+    }
 
     joinPromise<F>(promise:Promise<F>):PromiseHolder<{first:E,latter:F}>{
         return new PromiseHolder(new Promise((resolve,reject)=>{
