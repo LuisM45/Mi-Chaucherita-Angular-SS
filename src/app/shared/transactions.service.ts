@@ -260,7 +260,7 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
     const d = doc(this.getConextColById(accountId),id)
 
     return new PromiseHolder(this.getTransactionOnly(accountId,id))
-      .peek(_=>setDoc(d,this.documentEncryptor.transactionToCipherobj(transaction)))
+      .peek(async _=>setDoc(d,await this.documentEncryptor.transactionToCipherobj(transaction)))
       .joinPromise(this.accountService.getAccount(accountId))
       .pipe(results=>{
         const delta = transaction.amount - results.first.amount

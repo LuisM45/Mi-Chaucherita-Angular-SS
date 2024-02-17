@@ -43,9 +43,8 @@ export class AES256 implements EncyrptionAlgorithm{
           return derivedKey;
     }
 
-    async _encrypt (plaintext: string): Promise<string>{
-
-        console.log(`toEncrypt:${plaintext}`)
+    async encrypt (plaintext: string): Promise<string>{
+        // str -> buffer -> c(Buffer) -> c(base64)
         return new PromiseHolder(window.crypto.subtle.encrypt(
             {
                 name: this.algorithmName,
@@ -58,8 +57,7 @@ export class AES256 implements EncyrptionAlgorithm{
         .promise
     };
     
-    async _decrypt (ciphertext: string): Promise<string>{
-        console.log(`toClear:${ciphertext}`)
+    async decrypt (ciphertext: string): Promise<string>{
         return new PromiseHolder(window.crypto.subtle.decrypt(
             {
                 name: this.algorithmName,
@@ -69,11 +67,8 @@ export class AES256 implements EncyrptionAlgorithm{
             Buffer.from(ciphertext,"base64") //ArrayBuffer of the data
         ))
         .pipe(e=>Buffer.from(e).toString('utf8'))
-        .peek(e=>console.log(`decrypted:${e}`))
         .promise
     };
 
-    encrypt = this._encrypt
-    decrypt = this._decrypt
     
 }

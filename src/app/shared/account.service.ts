@@ -5,9 +5,10 @@ import { DocumentReference, addDoc, collection, deleteDoc, doc, getDoc, getDocs,
 import { DocumentData } from '@firebase/firestore-types';
 import { Account } from '../interfaces/accout.interface';
 import { PromiseHolder } from '../classes/PromiseHolder.class';
-import { parseDocToAccount, sanitizeAccount } from './utils';
+import { DocumentEncryptor, parseDocToAccount, sanitizeAccount, toBigPromise } from './utils';
 import { Transaction } from '../interfaces/transaction.interface';
 import { TransactionsService } from './transactions.service';
+import { EncryptionService } from './encryption.service';
 
 @Injectable({
   providedIn: 'root'
@@ -41,45 +42,48 @@ export class AccountService {
   get contextCol(){
     return this._contextCol
   }
+  
   private _contextCol
-
+  private documentEncryptor: DocumentEncryptor;
   constructor(
     private userService:UserService,
     private firestoreNew: Firestore = inject(Firestore),
+    private encSvc:EncryptionService,
     ) {
+      this.documentEncryptor = new DocumentEncryptor(encSvc)
       this._contextCol = collection(this.firestoreNew,"transactions",this.userService.currentUser?.uid!!,"account")
     }
 
-  createAccount(account:Account):Promise<string>{
-    return new PromiseHolder(addDoc(this.contextCol,account))
+  async createAccount(account:Account):Promise<string>{
+    return new PromiseHolder(addDoc(this.contextCol,await this.documentEncryptor.accountToCipherobj(account)))
       .pipe( docSnap=> docSnap.id)
       .promise
   }
 
-  getAllAccounts():Promise<Account[]> {
+  async getAllAccounts():Promise<Account[]> {
       return new PromiseHolder(getDocs(this.contextCol))
-        .pipe( snapshot=>  snapshot.docs.map(parseDocToAccount) )
+        .pipe( snapshot=>  toBigPromise(snapshot.docs.map(async a=>await this.documentEncryptor.cipherdocToAccount(a))))
         .promise
   }
 
-  getAccount(id:string):Promise<Account> {
+  async getAccount(id:string):Promise<Account> {
     const document = doc(this.contextCol,id)
     return new PromiseHolder(getDoc(document))
-      .pipe( parseDocToAccount )
+      .pipe(async a=> await this.documentEncryptor.cipherdocToAccount(a))
       .promise
   }
 
-  updateAccountAsWhole(account:Account):Promise<Account> {    
+  async updateAccountAsWhole(account:Account):Promise<Account> {    
     const _account = {...account}
     
-    return this.updateAccount(_account.id!!,_account)
+    return this.updateAccount(_account.id!!, _account)
+  
   }
 
-  updateAccount(id:string,account:Account):Promise<Account> {
-    console.log("with id")
+  async updateAccount(id:string,account:Account):Promise<Account> {
     const document = doc(this.contextCol,id)
-    console.log("update")
-    return new PromiseHolder(setDoc(document,sanitizeAccount(account)))
+
+    return new PromiseHolder(setDoc(document,await this.documentEncryptor.accountToCipherobj(account)))
       .pipe(_=>account)
       .promise
   }

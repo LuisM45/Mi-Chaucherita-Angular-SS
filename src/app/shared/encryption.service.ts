@@ -3,6 +3,8 @@ import { initializeApp } from 'firebase/app';
 // import { createHash } from 'crypto';
 import { EncyrptionAlgorithm } from '../interfaces/cryptography/encryption_algorithm.interface';
 import { AES256 } from '../classes/cryptography/AES256.class';
+import { PartialHomomorphicAlgorithm } from '../interfaces/cryptography/partial_homomorfic_algorithm.interface';
+import { Pailler } from '../classes/cryptography/Pailler.class';
 
 const crypto = require("crypto-browserify")
 
@@ -12,8 +14,10 @@ const crypto = require("crypto-browserify")
 export class EncryptionService {
   privateKey = ""
   private symmetricEncryptor?: EncyrptionAlgorithm
+  private partialEncryptor?: PartialHomomorphicAlgorithm
   constructor() {
-      this.symmetricEncryptor = new AES256(this.privateKey)
+    this.symmetricEncryptor = new AES256(this.privateKey)
+    this.partialEncryptor = new Pailler(this.privateKey)
   }
 
   initialize(username:string, password:string){
@@ -22,24 +26,17 @@ export class EncryptionService {
     this.privateKey = crypto.createHash("sha256").update(hash1+hash2).digest("base64")
 
     this.symmetricEncryptor = new AES256(this.privateKey)
+    this.partialEncryptor = new Pailler(this.privateKey)
+
   }
 
   loadSession(){
-    console.log("Loading key")
     let _apr = localStorage.getItem("apr")
     if(_apr)this.privateKey = _apr
     else this.privateKey = ""
-    this.symmetricEncryptor?.encrypt("wawa").then(e=>{
-      // console.log(e.length)
-      // this.symmetricEncryptor?.decrypt("w8WXCl892qKNqnywbf/yEw==")
-      this.symmetricEncryptor?.decrypt(e)
-    })
-    
-    
   }
   
   storeSession(){
-    console.log("Storing key")
     localStorage.setItem("apr",this.privateKey)
   }
 
@@ -59,15 +56,15 @@ export class EncryptionService {
 
   }
 
-  partialEncryption(){
-
+  partialEncryption(plaintext:string):Promise<string>{
+    return this.partialEncryptor!!.encrypt(plaintext)
   }
 
-  partialDecryption(){
-
+  partialDecryption(ciphertext:string):Promise<string>{
+    return this.partialEncryptor!!.decrypt(ciphertext)
   }
 
-  partialOperation(){
-    
+  partialOperation(ciphertext1:string,ciphertext2:string):Promise<string>{
+    return new Promise((a,b)=>{});
   }
 }

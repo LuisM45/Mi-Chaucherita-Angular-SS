@@ -82,6 +82,8 @@ export class DocumentEncryptor{
   constructor(private encryptSvc: EncryptionService){}
   private sencrypt(plaintext:string){return this.encryptSvc.symmetricEncryption(plaintext)}
   private sdecrypt(ciphertext:string){return this.encryptSvc.symmetricDecryption(ciphertext)}
+  private hencrypt(plaintext:string){return this.encryptSvc.partialEncryption(plaintext)}
+  private hdecrypt(ciphertext:string){return this.encryptSvc.partialDecryption(ciphertext)}
 
   async cipherdocToTransaction(documentSnapshot:DocumentSnapshot): Promise<Transaction>{
     const data = documentSnapshot.data()!
@@ -90,26 +92,39 @@ export class DocumentEncryptor{
       account: ()=>documentSnapshot.ref,
       id: documentSnapshot.id,
       title: await this.sdecrypt(data['title']),
-      amount: Number(await this.sdecrypt(data['amount'])),
+      amount: Number(await this.hdecrypt(data['amount'])),
       timeOfTransaction: (data!!['timeOfTransaction'] as Timestamp).toDate(),
       description: await this.sdecrypt(data['description']),
     }
   }
 
-  cipherdocToAccount(documentSnapshot:DocumentSnapshot){
+  async cipherdocToAccount(documentSnapshot:DocumentSnapshot):Promise<Account>{
+    const data = documentSnapshot.data()!
+    return {
+      id: documentSnapshot.id,
+      name: await this.sdecrypt(data['name']),
+      registerCount: Number(await this.hdecrypt(data['registerCount'])),
+      currentValue: Number(await this.hdecrypt(data['currentValue'])),
+      type: (await this.sdecrypt(data['type'])) as "income"| "spending" | "income and spending",
+  }
   }
 
-  async transactionToCipherobj(transaction: Transaction): Promise<any>{
+  async transactionToCipherobj(transaction: Transaction): Promise<object>{
     return {
       title: await this.sencrypt(transaction.title),
-      amount: await this.sencrypt(transaction.amount.toString()),
+      amount: await this.hencrypt(transaction.amount.toString()),
       timeOfTransaction: transaction.timeOfTransaction,
       description: await this.sencrypt(transaction.description)
     }
   }
   
-  accountToCipherobj(): any{
-    return null
+  async accountToCipherobj(account: Account): Promise<object>{
+    return {
+      name: await this.sencrypt(account.name),
+      registerCount: await this.hencrypt(account.registerCount.toString()),
+      currentValue: await this.hencrypt(account.currentValue.toString()),
+      type: await this.sencrypt(account.type),
+  }
   }
 }
 

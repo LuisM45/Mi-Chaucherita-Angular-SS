@@ -5,15 +5,15 @@ export class ElGamal implements PartialHomomorphicAlgorithm{
     constructor(private key:string,private byteSize: number){}
 
     id = "ElGamal";
-    encrypt = function <A>(arg0: A): string{
-        return ""; // TODO: Code logic
+    encrypt = function (arg0: string): Promise<string>{
+        return new Promise(()=>{}); // TODO: Code logic
     };
-    decrypt = function <A>(arg0: string): A{
-        return (0) as A //TODO: Code logic
+    decrypt = function (arg0: string): Promise<string>{
+        return new Promise(()=>{});  //TODO: Code logic
     };
 
-    operate = function (arg0: string): string{
-        return (""); // TODO: Code logic
+    operate = function (arg0: string): Promise<string>{
+        return new Promise(()=>{});  // TODO: Code logic
     };
     
 }

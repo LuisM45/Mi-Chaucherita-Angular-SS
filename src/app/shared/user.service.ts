@@ -22,6 +22,7 @@ loadSession(){
   this.encrSvc.loadSession()
 }
 
+
 storeSession(){
   localStorage.setItem("user",JSON.stringify(this.currentUser))
   this.encrSvc.storeSession()
