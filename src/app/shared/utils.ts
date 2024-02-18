@@ -5,6 +5,7 @@ import { Account } from "../interfaces/accout.interface"
 import { PromiseHolder } from "../classes/PromiseHolder.class"
 import { Subscription } from "rxjs"
 import { EncryptionService } from "./encryption.service"
+import { Pailler } from "../classes/cryptography/Pailler.class"
 
 
 export function toLocalStringUpToMinute(date: Date):string{
@@ -110,6 +111,14 @@ export class DocumentEncryptor{
   }
 
   async transactionToCipherobj(transaction: Transaction): Promise<object>{
+    var parms = Pailler.create()
+    var p = Pailler.create()
+    var amount = "notin"
+    var camount = await p.encrypt(amount)
+    var pamount = await p.decrypt(camount)
+    console.log(`amount ${amount}`)
+    console.log(`camount ${camount}`)
+    console.log(`pamount ${pamount}`)
     return {
       title: await this.sencrypt(transaction.title),
       amount: await this.hencrypt(transaction.amount.toString()),

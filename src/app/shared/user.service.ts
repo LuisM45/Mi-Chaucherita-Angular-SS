@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { EncryptionService } from './encryption.service';
+import { Globals } from './global';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class UserService {
 
   constructor(
     public authFire: AngularFireAuth,
-    public encrSvc: EncryptionService
+    public encSvc: EncryptionService
   ) {
     this.loadSession()
   }
@@ -19,13 +20,12 @@ loadSession(){
   var user = localStorage.getItem("user")
   if(user==null) return
   this.currentUser = JSON.parse(user)
-  this.encrSvc.loadSession()
+  Globals.resolvers.userId(this.currentUser!.uid)
 }
 
 
 storeSession(){
   localStorage.setItem("user",JSON.stringify(this.currentUser))
-  this.encrSvc.storeSession()
 }
 
 logWithPasswordAndEmail(email:string,password:string){
@@ -36,8 +36,9 @@ logWithPasswordAndEmail(email:string,password:string){
       if(it.user == null) reject(it.operationType)
       resolve(it.user!!)
       this.currentUser = it.user
-      this.encrSvc.initialize(email,password)
+      Globals.resolvers.userId(it.user!.uid)
       this.storeSession()
+      this.encSvc.initialize(email,password)
     })
     .catch( e => {reject(e)})
   })
@@ -51,8 +52,9 @@ registerWithPasswordAndEmail(email:string,password:string){
       if(it.user == null) reject(it.operationType)
       resolve(it.user!!)
       this.currentUser = it.user
-      this.encrSvc.initialize(email,password)
+      Globals.resolvers.userId(it.user!.uid)
       this.storeSession()
+      this.encSvc.initialize(email,password)
     })
     .catch( e => {reject(e)})
   })
@@ -61,5 +63,6 @@ registerWithPasswordAndEmail(email:string,password:string){
 logout(){
   localStorage.removeItem("user")
   this.currentUser = null
+  this.encSvc.logout()
 }
 }

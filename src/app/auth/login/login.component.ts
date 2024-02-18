@@ -30,14 +30,12 @@ export class LoginComponent implements OnInit {
   }
 
   login() {
-    console.log(`tag:login ${this.username} ${this.password}`)
     this.userService.logWithPasswordAndEmail(this.username, this.password)
       .then(_ => this.router.navigate(["/", "dashboard"]))
 
   }
 
   register() {
-    console.log(`register ${this.username} ${this.password}`)
     this.userService.registerWithPasswordAndEmail(this.username, this.password)
       .then(_ => this.router.navigate(["/", "dashboard"]))
   }
