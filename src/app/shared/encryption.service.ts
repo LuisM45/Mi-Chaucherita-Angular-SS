@@ -49,7 +49,7 @@ export class EncryptionService {
 
 
 
-  async initialize(username:string, password:string){
+  async fetch(username:string, password:string){
     let hash1 = crypto.createHash("sha256").update(username).digest("base64")
     let hash2 = crypto.createHash("sha256").update(password).digest("base64")
     let privateKey = crypto.createHash("sha256").update(hash1+hash2).digest("base64")
