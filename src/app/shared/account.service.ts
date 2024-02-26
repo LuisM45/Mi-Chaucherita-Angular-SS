@@ -5,7 +5,7 @@ import { DocumentReference, addDoc, collection, deleteDoc, doc, getDoc, getDocs,
 import { DocumentData } from '@firebase/firestore-types';
 import { Account } from '../interfaces/accout.interface';
 import { PromiseHolder } from '../classes/PromiseHolder.class';
-import { DocumentEncryptor, parseDocToAccount, sanitizeAccount, toBigPromise } from './utils';
+import { parseDocToAccount, sanitizeAccount, toBigPromise } from './utils';
 import { Transaction } from '../interfaces/transaction.interface';
 import { TransactionsService } from './transactions.service';
 import { EncryptionService } from './encryption.service';
@@ -45,32 +45,30 @@ export class AccountService {
   }
   
   private _contextCol
-  private documentEncryptor: DocumentEncryptor;
   constructor(
     private userService:UserService,
     private firestoreNew: Firestore = inject(Firestore),
     private encSvc:EncryptionService,
     ) {
-      this.documentEncryptor = new DocumentEncryptor(encSvc)
       this._contextCol = collection(this.firestoreNew,"transactions",this.userService.currentUser?.uid!!,"account")
     }
 
   async createAccount(account:Account):Promise<string>{
-    return new PromiseHolder(addDoc(this.contextCol,await this.documentEncryptor.accountToCipherobj(account)))
+    return new PromiseHolder(addDoc(this.contextCol,await this.encSvc.accountToCipherobj(account)))
       .pipe( docSnap=> docSnap.id)
       .promise
   }
 
   async getAllAccounts():Promise<Account[]> {
       return new PromiseHolder(getDocs(this.contextCol))
-        .pipe( snapshot=>  toBigPromise(snapshot.docs.map(async a=>await this.documentEncryptor.cipherdocToAccount(a))))
+        .pipe( snapshot=>  toBigPromise(snapshot.docs.map(async a=>await this.encSvc.cipherdocToAccount(a))))
         .promise
   }
 
   async getAccount(id:string):Promise<Account> {
     const document = doc(this.contextCol,id)
     return new PromiseHolder(getDoc(document))
-      .pipe(async a=> await this.documentEncryptor.cipherdocToAccount(a))
+      .pipe(async a=> await this.encSvc.cipherdocToAccount(a))
       .promise
   }
 
@@ -84,7 +82,7 @@ export class AccountService {
   async updateAccount(id:string,account:Account):Promise<Account> {
     const document = doc(this.contextCol,id)
 
-    return new PromiseHolder(setDoc(document,await this.documentEncryptor.accountToCipherobj(account)))
+    return new PromiseHolder(setDoc(document,await this.encSvc.accountToCipherobj(account)))
       .pipe(_=>account)
       .promise
   }
