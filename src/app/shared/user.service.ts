@@ -38,7 +38,7 @@ logWithPasswordAndEmail(email:string,password:string){
       this.currentUser = it.user
       Globals.resolvers.userId(it.user!.uid)
       this.storeSession()
-      this.encSvc.initialize(email,password)
+      this.encSvc.fetch(email,password)
     })
     .catch( e => {reject(e)})
   })
@@ -54,7 +54,7 @@ registerWithPasswordAndEmail(email:string,password:string){
       this.currentUser = it.user
       Globals.resolvers.userId(it.user!.uid)
       this.storeSession()
-      this.encSvc.initialize(email,password)
+      this.encSvc.fetch(email,password)
     })
     .catch( e => {reject(e)})
   })
