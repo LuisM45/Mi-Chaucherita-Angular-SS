@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { EncryptionService } from './encryption.service';
 import { Globals } from './global';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ export class UserService {
 
   constructor(
     public authFire: AngularFireAuth,
-    public encSvc: EncryptionService
+    public encSvc: EncryptionService,
   ) {
     this.loadSession()
   }
@@ -64,5 +65,6 @@ logout(){
   localStorage.removeItem("user")
   this.currentUser = null
   this.encSvc.logout()
+  window.location.reload()
 }
 }
