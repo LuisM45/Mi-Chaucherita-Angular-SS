@@ -58,6 +58,11 @@ export class EncryptionService {
     this.resolvers.masterEncryptor(masterEncryptor)
 
     let keydoc = await getDoc(await this.keydocRef)
+    if (!keydoc.exists()){
+      await this.regenerateKeyDoc()
+      keydoc = await getDoc(await this.keydocRef)
+    }
+
     const symKeyB64:string = keydoc.get("symmetric")
 
     if(symKeyB64 == undefined) this.regenerateSymKey()
@@ -75,6 +80,10 @@ export class EncryptionService {
     }
 
     this.storeKeys()
+  }
+
+  async regenerateKeyDoc(){
+    setDoc(await this.keydocRef,{})
   }
 
   async regenerateSymKey(){
