@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { where } from 'firebase/firestore';
 import { PromiseHolder } from 'src/app/classes/PromiseHolder.class';
@@ -15,13 +15,14 @@ import { accountTypeToSpanish } from 'src/app/shared/utils';
   styleUrls: ['./dashboard.component.scss']
 })
 
-export class DashboardComponent {
+export class DashboardComponent implements OnInit{
 
   _accountTypeToSpanish=accountTypeToSpanish
-  accounts?: Account[];
-  balance?: number = undefined
-  spendings?: number = undefined
-  earnings?: number = undefined
+  accounts: Promise<Account>[] = [];
+  balance: number = 0
+  spendings: number = 0
+  earnings: number = 0
+  todate: Date
   isMenuOpen = false;
   isAsideOpen: boolean = false;
 
@@ -32,12 +33,15 @@ export class DashboardComponent {
     public router: Router,
     public accountService: AccountService
   ) {
-    this.loadBalances()
-    this.loadAccounts()
+    this.todate = new Date
+  }
+  async ngOnInit(): Promise<void> {
+    await this.loadAccounts()
+    await this.loadBalances()
   }
 
-  loadAccounts() {
-   this.accountService.getAllAccounts().then(e=>this.accounts=e)
+  async loadAccounts() {
+    this.accounts = await this.accountService.getAllAccounts()
   }
 
 
@@ -49,15 +53,37 @@ export class DashboardComponent {
     this.isAsideOpen = !this.isAsideOpen;
   }
 
-  loadBalances() {
-    new PromiseHolder(this.accountService.getAllAccounts())
-      .peek(acounts=>{
-        this.earnings = acounts.filter(a=>a.type=="income").map(a=>a.currentValue).reduce((p,c)=>p+c,0)
-        this.spendings = acounts.filter(a=>a.type=="spending").map(a=>a.currentValue).reduce((p,c)=>p+c,0)
-        this.balance = acounts.map(a=>a.currentValue).reduce((p,c)=>p+c,0)
+  async loadBalances() {
+    const accum = [0,0,0]
+    this.accounts.forEach(
+      aP=>aP.then(ac =>{
+        const delta = this.addAccount(ac)
+        for(var i =0;i<2;i++) accum[i] += delta[i]
+        this.earnings = accum[0]
+        this.spendings = accum[1]
+        this.balance = accum[0] - accum[1]
       })
-
+    )
   }
+
+  private addAccount(account:Account):[number,number]{
+    // Esto esta to' feo por el orden de llamadas interno
+    switch(account.type){
+      case 'income':
+        return [ account.currentValue, 0]
+      case 'spending':
+        return [0,account.currentValue]
+      case 'income and spending':
+        if(account.currentValue>0){
+          return [account.currentValue,0]
+        }
+        else{
+          return [0,account.currentValue]
+        }
+      }
+  }
+  
+  
 
   logout() {
     console.log("logout attempted")

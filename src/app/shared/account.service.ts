@@ -3,12 +3,13 @@ import { UserService } from './user.service';
 import { Firestore } from '@angular/fire/firestore';
 import { DocumentReference, addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from '@firebase/firestore';
 import { DocumentData } from '@firebase/firestore-types';
-import { Account } from '../interfaces/accout.interface';
+import { Account, NullableAccount } from '../interfaces/accout.interface';
 import { PromiseHolder } from '../classes/PromiseHolder.class';
 import { parseDocToAccount, sanitizeAccount, toBigPromise } from './utils';
 import { Transaction } from '../interfaces/transaction.interface';
 import { TransactionsService } from './transactions.service';
 import { EncryptionService } from './encryption.service';
+import { updateDoc } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -59,10 +60,22 @@ export class AccountService {
       .promise
   }
 
-  async getAllAccounts():Promise<Account[]> {
-      return new PromiseHolder(getDocs(this.contextCol))
-        .pipe( snapshot=>  toBigPromise(snapshot.docs.map(async a=>await this.encSvc.cipherdocToAccount(a))))
-        .promise
+  async getAllAccountsIds():Promise<string[]> {
+    const ids:string[] = []
+    const docs = await getDocs(this.contextCol)
+    docs.forEach((d)=>ids.push(d.id))
+    return ids
+    
+}
+
+  async getAllAccounts():Promise<Promise<Account>[]> {
+      const accounts:Promise<Account>[] = []
+      const docs = await getDocs(this.contextCol)
+      docs.forEach(async (d)=>{
+        accounts.push(this.encSvc.cipherdocToAccount(d))
+      })
+      return accounts
+      
   }
 
   async getAccount(id:string):Promise<Account> {
@@ -77,6 +90,12 @@ export class AccountService {
     
     return this.updateAccount(_account.id!!, _account)
   
+  }
+
+  async updatePartialAccount(id:string,nAccount:NullableAccount):Promise<void> {
+    const document = doc(this.contextCol,id)
+
+    await updateDoc(document,await this.encSvc.nullableAccountToCipherobj(nAccount))
   }
 
   async updateAccount(id:string,account:Account):Promise<Account> {

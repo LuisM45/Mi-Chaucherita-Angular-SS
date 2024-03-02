@@ -9,13 +9,13 @@
             </tr>
         </thead>
         <tbody>
-            <ng-container *ngFor="let t of response.results; let i = index">
-                <tr (click)="viewTransaction(t.id, t.data)"
+            <ng-container *ngFor="let t of response; let i = index">
+                <tr (click)="viewTransaction(t)"
                     class="text-center cursor-pointer transition-colors duration-300 hover:bg-primary hover:text-white border-primary border">
-                    <td class="py-2">{{ t.data.title }}</td>
-                    <td class="py-2">{{ t.data.amount }}</td>
-                    <td class="py-2">{{ t.data.timeOfTransaction }}</td>
-                    <td class="py-2">{{ t.data.description }}</td>
+                    <td class="py-2">{{ t.title }}</td>
+                    <td class="py-2">{{ t.amount }}</td>
+                    <td class="py-2">{{ t.timeOfTransaction }}</td>
+                    <td class="py-2">{{ t.description }}</td>
                 </tr>
             </ng-container>
         </tbody>

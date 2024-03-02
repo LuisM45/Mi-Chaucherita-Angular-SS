@@ -25,9 +25,7 @@ export class TransactionTableInnerComponent implements OnInit{
   @Input() accountId: string = ""
 
   queryConstraints:QueryConstraint[] = []
-  response: PagedQuery<Transaction> = {
-    results: []
-  }
+  response: Transaction[] = []
   constructor(
     private accountServiec: AccountService,
     private _transactionService: TransactionsService,
@@ -39,13 +37,20 @@ export class TransactionTableInnerComponent implements OnInit{
     else{this.fetchAll()}
   }
 
-  fetchAll(){
-    this._transactionService.getAllTransactionList().then(r=>this.response=r)
+  async fetchAll(){
+    const transactionsPs = await this._transactionService.getAllAccountsTransactionsList()
+    const transactions:Transaction[] = []
+    transactionsPs.forEach(tsP=>tsP.then(ts=>{
+      transactions.push(...ts)
+      this.response.push(...ts);
+    }))
+
+    await Promise.all(transactions)
   }
 
   fetchIdOnly(){
     this.transactionService.getTransactionList1(this.accountId,[]).then(tl=>{
-      this.response = tl
+      this.response = tl.results
     }).catch(e=>console.log(e))
   }
 
@@ -69,22 +74,22 @@ export class TransactionTableInnerComponent implements OnInit{
 
   }
 
-  viewTransaction(id:string,transaction:Transaction){
-    this.cache.set(id,transaction)
-    this.router.navigate(['/','transaction','view',this.accountId,id])
+  viewTransaction(transaction:Transaction){
+    this.cache.set(transaction.id!,transaction)
+    this.router.navigate(['/','transaction','view',this.accountId,transaction.id!])
   }
 
   navigatePrevious() {
-    if(!this.response.prevPage) return
-    this.response.prevPage().then(page=>{
-      this.response = page
-    })
+    // if(!this.response.prevPage) return
+    // this.response.prevPage().then(page=>{
+    //   this.response = page
+    // })
   }
 
   navigateNext() {
-    if(!this.response.nextPage) return
-    this.response.nextPage().then(page=>{
-      this.response = page
-    })
+    // if(!this.response.nextPage) return
+    // this.response.nextPage().then(page=>{
+    //   this.response = page
+    // })
   }
 }

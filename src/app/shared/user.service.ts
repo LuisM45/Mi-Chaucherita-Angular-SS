@@ -3,15 +3,19 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { EncryptionService } from './encryption.service';
 import { Globals } from './global';
 import { Router } from '@angular/router';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { Firestore } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   currentUser: firebase.default.User | null = null
+  username = ""
 
   constructor(
     public authFire: AngularFireAuth,
+    public firestore: Firestore,
     public encSvc: EncryptionService,
   ) {
     this.loadSession()
@@ -20,6 +24,7 @@ export class UserService {
 loadSession(){
   var user = localStorage.getItem("user")
   if(user==null) return
+  this.username = localStorage.getItem("username")!
   this.currentUser = JSON.parse(user)
   Globals.resolvers.userId(this.currentUser!.uid)
   this.encSvc.restoreKeysWithSession()
@@ -28,41 +33,49 @@ loadSession(){
 
 storeSession(){
   localStorage.setItem("user",JSON.stringify(this.currentUser))
+  localStorage.setItem("username",this.username)
 }
 
-logWithPasswordAndEmail(email:string,password:string){
-  // Returns a promise that is only fullfiled if the login was successful (User authenticated)
-  return new Promise<firebase.default.User>((resolve,reject)=>{
-    this.authFire.signInWithEmailAndPassword(email,password)
-    .then( it=>{
-      if(it.user == null) reject(it.operationType)
-      resolve(it.user!!)
-      this.currentUser = it.user
-      Globals.resolvers.userId(it.user!.uid)
-      this.storeSession()
-      this.encSvc.initializeFromLogin(email,password)
-    })
-    .catch( e => {reject(e)})
-  })
+async logWithPasswordAndEmail(email:string,password:string):Promise<void>{
+  const possibleUser = await this.authFire.signInWithEmailAndPassword(email,password)
+  if(!possibleUser) return Promise.reject()
+
+  this.currentUser = possibleUser.user
+  Globals.resolvers.userId(this.currentUser!.uid)
+  await this.encSvc.initializeFromLogin(email,password)
+  await this.fetchUserdata()
+  this.storeSession()
+
 }
 
-registerWithPasswordAndEmail(email:string,password:string){
-  console.log("with register")
+async registerWithPasswordAndEmail(username:string,email:string,password:string):Promise<void>{
   // Returns a promise that is only fullfiled if the registrations was successful (User authenticated)
-  return new Promise<firebase.default.User>((resolve,reject)=>{
-    this.authFire.createUserWithEmailAndPassword(email,password)
-    .then( it=>{
-      if(it.user == null) reject(it.operationType)
-      resolve(it.user!!)
-      this.currentUser = it.user
-      Globals.resolvers.userId(it.user!.uid)
-      this.storeSession()
-      this.encSvc.initializeFromRegister(email,password)
-    })
-    .catch( e => {reject(e)})
-  })
+  const possibleUser = await this.authFire.createUserWithEmailAndPassword(email,password)
+  if(!possibleUser) return Promise.reject()
+
+  this.currentUser = possibleUser!.user
+  this.username=username
+  Globals.resolvers.userId(this.currentUser!.uid)
+  await this.encSvc.initializeFromRegister(email,password)
+  await this.uploadUserdata()
+  this.storeSession()
   
 }
+
+async fetchUserdata(){
+  const docRef = doc(this.firestore,"userdata",this.currentUser!.uid)
+  const docSnap = await getDoc(docRef)
+  const userdata = await this.encSvc.cipherdocToUserData(docSnap)
+  this.username = userdata.username
+}
+
+async uploadUserdata(){
+  // TODO: Edge cases
+  const cipherobj = await this.encSvc.userdataToCipherobj({username:this.username})
+  const docRef = doc(this.firestore,"userdata",this.currentUser!.uid)
+  await setDoc(docRef,cipherobj)
+}
+
 logout(){
   localStorage.removeItem("user")
   this.currentUser = null

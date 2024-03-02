@@ -9,3 +9,11 @@ export interface Account{
     type: "income"| "spending" | "income and spending"
     transactions?: ()=>DocumentSnapshot[]
 }
+
+export interface NullableAccount{
+    id?: string,
+    name?: string,
+    registerCount?: number,
+    currentValue?:number,
+    type?: "income"| "spending" | "income and spending"
+}

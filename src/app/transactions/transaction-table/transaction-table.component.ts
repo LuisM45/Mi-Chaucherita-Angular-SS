@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { QueryConstraint } from 'firebase/firestore';
 import { PagedQuery } from 'src/app/interfaces/query.interface';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
+import { AccountService } from 'src/app/shared/account.service';
 import { CacheService } from 'src/app/shared/cache.service';
 import { TransactionsService } from 'src/app/shared/transactions.service';
 
@@ -16,6 +17,7 @@ export class TransactionTableComponent {
 
 constructor(
   private transactionService: TransactionsService,
+  private accountSvc: AccountService,
   private cache: CacheService,
   private router: Router
 ){

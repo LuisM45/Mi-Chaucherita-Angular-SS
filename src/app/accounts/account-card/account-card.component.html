@@ -14,7 +14,7 @@
   <div class="w-full md:w-2/3 px-4 py-3 flex flex-col justify-between ">
     <p class="text-2xl mov">{{ accountName }}</p>
     <p class="text-center text-xl">Monto: ${{ accountBalance }}</p>
-    <p class="text-lg">Tipo: {{ _accountTypeToSpanish(accountType) }}</p>
+    <p class="text-lg">Tipo: {{ accountType ?? _accountTypeToSpanish(accountType!) }}</p>
     <p class="text-lg">Último motivo: {{ lastTransactionReason }}</p>
     <p class="text-end mov">Cod° mov: {{ transactionCount }}</p>
   </div>

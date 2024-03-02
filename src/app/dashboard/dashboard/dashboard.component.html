@@ -5,8 +5,8 @@
         <img src="assets/profile.png" alt="" class="w-20">
       </div>
       <div class="flex flex-col pt-4">
-        <p class="font-bold text-lg">@LuisM</p>
-        <p>Lunes, 01 ene, 2023</p>
+        <p class="font-bold text-lg">{{ userService.username }}</p>
+        <p>{{ todate.toDateString() }}</p>
       </div>
     </div>
     <h2 class="text-center">Resumen del mes</h2>
@@ -52,7 +52,7 @@
           <img src="assets/profile.png" class="w-24">
         </div>
         <div class=" flex flex-col pt-4 ">
-          <p class="font-bold">@LuisM</p>
+          <p class="font-bold">{{ userService.username }}</p>
           <p>Lunes, 01 ene, 2023</p>
         </div>
       </div>
@@ -125,15 +125,12 @@
     </div>
     <div class="px-2  lg:px-10 py-4 lg:py-8 grid justify-center md:grid-cols-2 max-h-[544px] overflow-y-auto  ">
       <!-- Renderizar la tarjetas -->
-      <div *ngFor="let account of accounts" class="mb-8 hover:scale-105 transition hover:cursor-pointer">
-        <app-account-card
-          [accountId]="account.id!!"
-          [accountName]="account.name"
-          [accountType]="account.type"
-          [imageUrl]="''"
-          [accountBalance]="account.currentValue"
-          [transactionCount]="account.registerCount">
-        </app-account-card>
+      <div *ngFor="let accountP of accounts" class="mb-8 hover:scale-105 transition hover:cursor-pointer">
+        <ng-container *ngIf="accountP | async">
+          <app-account-card
+          [account] = "accountP"/>
+        </ng-container>
+        
       </div>
     </div>
   </article>

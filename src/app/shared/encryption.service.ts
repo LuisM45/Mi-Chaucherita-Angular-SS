@@ -6,8 +6,9 @@ import { Pailler, PaillerParms } from '../classes/cryptography/Pailler.class';
 import { Firestore } from '@angular/fire/firestore';
 import { SymmetricalEncyrptionAlgorithm as SymmetricEncyrptionAlgorithm } from '../interfaces/cryptography/symmetrical_encryption_algorithm.interface';
 import { Globals } from './global';
-import { Account } from '../interfaces/accout.interface';
+import { Account, NullableAccount } from '../interfaces/accout.interface';
 import { Transaction } from '../interfaces/transaction.interface';
+import { UserData } from '../interfaces/userdata.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -331,7 +332,39 @@ export class EncryptionService {
       registerCount: await this.encryptor.homomorphic!.encrypt(account.registerCount.toString()),
       currentValue: await this.encryptor.homomorphic!.encrypt(account.currentValue.toString()),
       type: await this.encryptor.symmetric!.encrypt(account.type),
+    }
   }
+
+  async userdataToCipherobj(userData: UserData):Promise<object>{
+    await this.ready.symmetric
+    return {
+      username: await this.encryptor.symmetric!.encrypt(userData.username)
+    }
+  }
+
+  async cipherdocToUserData(documentSnapshot:DocumentSnapshot):Promise<UserData>{
+    const data = documentSnapshot.data()!
+    
+    await this.ready.symmetric
+    return {
+      username: await this.encryptor.symmetric!.decrypt(data["username"])
+    }
+  }
+
+  async nullableAccountToCipherobj(nAccount: NullableAccount): Promise<object>{
+    const cipherobj: {
+      name?:string
+      registerCount?:string
+      currentValue?:string
+      type?:string
+    } = {}
+
+    if(nAccount.name) cipherobj.name =await this.encryptor.symmetric!.encrypt(nAccount.name)
+    if(nAccount.registerCount) cipherobj.registerCount = await this.encryptor.homomorphic!.encrypt(nAccount.registerCount.toString())
+    if(nAccount.currentValue) cipherobj.currentValue = await this.encryptor.homomorphic!.encrypt(nAccount.currentValue.toString())
+    if(nAccount.type) cipherobj.type =await this.encryptor.symmetric!.encrypt(nAccount.type)
+
+    return cipherobj
   }
   
 }

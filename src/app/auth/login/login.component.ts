@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
   }
 
   register() {
-    this.userService.registerWithPasswordAndEmail(this.username, this.password)
+    this.userService.registerWithPasswordAndEmail(this.name,this.username, this.password)
       .then(_ => this.router.navigate(["/", "dashboard"]))
   }
 

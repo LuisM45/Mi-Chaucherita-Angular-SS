@@ -21,7 +21,7 @@ export class TransactionDetailComponent {
 
   public get transaction():Transaction | undefined{
     if(this.response.results.length==0) return undefined
-    return this.response.results[0].data
+    return this.response.results[0]
   }
 
   public accountId:string | undefined
@@ -42,7 +42,7 @@ export class TransactionDetailComponent {
     this.id = params.get("id")!!
     this.accountId = params.get("accountId")!!
     this.cache.get<Transaction>(this.id!!)
-      .then(r=>this.response.results.push({id:this.id!!,data:r}))
+      .then(r=>this.response.results.push(r))
       .catch(_=>{})
 
     getQueryConstraints(this.route).then( constraints =>{

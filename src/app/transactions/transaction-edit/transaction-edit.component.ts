@@ -28,7 +28,7 @@ export class TransactionEditComponent implements OnInit{
       this.accountId = pm.get("accountId")!!
       
     this.transactionService.getTransaction(this.accountId,this.id)
-        .then(t=>this.transaction=t.results[0].data)
+        .then(t=>this.transaction=t.results[0])
     })
   }
 
@@ -59,7 +59,6 @@ export class TransactionEditComponent implements OnInit{
       this.transaction
     ).then(a=>{this.router.navigate(['/','transaction','view',this.accountId,this.id])})
     .catch(console.log)
-   console.log(this.transaction) 
   }
 
 }
