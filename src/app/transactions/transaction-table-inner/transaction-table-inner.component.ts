@@ -51,7 +51,7 @@ export class TransactionTableInnerComponent implements OnInit{
   fetchIdOnly(){
     this.transactionService.getTransactionList1(this.accountId,[]).then(tl=>{
       this.response = tl.results
-    }).catch(e=>console.log(e))
+    }).catch(_=>_)
   }
 
   touchDescription() {

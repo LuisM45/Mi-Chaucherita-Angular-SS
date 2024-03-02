@@ -23,7 +23,7 @@ export class RegisterAccountComponent {
     ['Ingreso', 'Egreso', 'Ingreso/Egreso'];
   }
 
-  register() {
+  async register() {
     
     const newAccount:Account = {
       name: this.accountName!!,
@@ -32,7 +32,7 @@ export class RegisterAccountComponent {
       currentValue: 0
     }
 
-    this.accountSvc.createAccount(newAccount)
-      .then(doc=>this.router.navigate(["/","account-view",doc]))
+    const docId = await this.accountSvc.createAccount(newAccount)
+    this.router.navigate(["/","account-view",docId])
   }
 }

@@ -9,9 +9,27 @@ export class Pailler implements PartialHomomorphicAlgorithm{
     constructor(private keys: Promise<paillierBigint.KeyPair>){
 
     }
+
+    async numberEncrypt(plaintext: bigint): Promise<string>{
+        const pk = (await this.keys).publicKey
+
+        var complement2Plaintext = plaintext
+        if (plaintext<0) complement2Plaintext = pk.n/2n - plaintext
+        const ciphertext = pk.encrypt(complement2Plaintext,100n)
+        return bigintToString(ciphertext,"base64")
+    }
+    async numberDecrypt(ciphertext: string): Promise<bigint>{
+        const pr = (await this.keys).privateKey
+        const ciphertextBigInt = stringToBigint(ciphertext,"base64")
+        const complement2Plaintext = (await this.keys).privateKey.decrypt(ciphertextBigInt)
+        var plaintext = complement2Plaintext
+        if(plaintext>=pr.n/2n) plaintext =  pr.n/2n - complement2Plaintext
+        return plaintext
+    }
     async raw_encrypt(plainbytes: Uint8Array):Promise<Uint8Array>{
         return new Uint8Array()
     }
+
     async raw_decrypt(cipherbytes: Uint8Array):Promise<Uint8Array>{
         return new Uint8Array()
     }
@@ -21,10 +39,13 @@ export class Pailler implements PartialHomomorphicAlgorithm{
     static create(bitlen:number):Pailler;
     static create(parms:PaillerParms):Pailler;
     static create(parm0?:any):Pailler{
-        if(parm0==undefined) return this.createFromBitlen(3072)
-        if(typeof(parm0)=="number") return this.createFromBitlen(parm0)
-        if(typeof(parm0)=="object") return this.createFromParms(parm0)
-        return this.createFromBitlen(3072)
+        var retVal = this.createFromBitlen(3072)
+
+        if(parm0==undefined) retVal = this.createFromBitlen(3072)
+        if(typeof(parm0)=="number") retVal = this.createFromBitlen(parm0)
+        if(typeof(parm0)=="object") retVal =  this.createFromParms(parm0)
+        
+        return retVal
     }
 
     private static createFromParms(parms: PaillerParms):Pailler{
@@ -66,12 +87,15 @@ export class Pailler implements PartialHomomorphicAlgorithm{
     id = "Pailler";
     async encrypt (arg0: string): Promise<string>{
         // str -> bigint -> c(bigint) -> c(buffer) -> base64
+        // Sometimes doesnt work IDK why
+        console.error("HERE1")
         var bigm = stringToBigint(arg0,"utf8")
-        var bigc = (await this.keys).publicKey.encrypt(bigm)
+        var bigc = (await this.keys).publicKey.encrypt(bigm,100n)
         return bigintToString(bigc,"base64")
     };
 
     async decrypt (arg0: string): Promise<string>{
+        console.error("HERE2")
         var bigc = stringToBigint(arg0,"base64")
         var bigm = (await this.keys).privateKey.decrypt(bigc)
         return bigintToString(bigm,"utf8")

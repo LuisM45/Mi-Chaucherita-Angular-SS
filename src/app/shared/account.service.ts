@@ -55,9 +55,10 @@ export class AccountService {
     }
 
   async createAccount(account:Account):Promise<string>{
-    return new PromiseHolder(addDoc(this.contextCol,await this.encSvc.accountToCipherobj(account)))
-      .pipe( docSnap=> docSnap.id)
-      .promise
+    const cipherobj = await this.encSvc.accountToCipherobj(account)
+
+    const docRef = await addDoc(this.contextCol,cipherobj)
+    return docRef.id
   }
 
   async getAllAccountsIds():Promise<string[]> {

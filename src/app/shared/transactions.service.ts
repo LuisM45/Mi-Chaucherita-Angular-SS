@@ -299,12 +299,8 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
 
     // No borrar riesgo de Heisenbug
     const account = await accountP
-    console.log(account.registerCount)
     account.registerCount += 1
-    console.log(account.registerCount)
-    console.log(account.currentValue)
     account.currentValue += transaction.amount
-    console.log(account.currentValue)
     
     const updateP = this.accountService.updatePartialAccount(accountId,{registerCount:account.registerCount,currentValue:account.currentValue})
     let docRef = addDoc(this.getConextColById(accountId),cryptObj)

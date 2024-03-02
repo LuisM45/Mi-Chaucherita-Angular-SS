@@ -10,6 +10,8 @@ import { Account, NullableAccount } from '../interfaces/accout.interface';
 import { Transaction } from '../interfaces/transaction.interface';
 import { UserData } from '../interfaces/userdata.interface';
 
+const PRECISION = 1
+
 @Injectable({
   providedIn: 'root'
 })
@@ -294,7 +296,7 @@ export class EncryptionService {
       account: ()=>documentSnapshot.ref,
       id: documentSnapshot.id,
       title: await this.encryptor.symmetric!.decrypt(data['title']),
-      amount: Number(await this.encryptor.homomorphic!.decrypt(data['amount'])),
+      amount: Number(await this.encryptor.homomorphic!.numberDecrypt(data['amount']))/PRECISION,
       timeOfTransaction: (data!!['timeOfTransaction'] as Timestamp).toDate(),
       description: await this.encryptor.symmetric!.decrypt(data['description']),
     }
@@ -307,10 +309,23 @@ export class EncryptionService {
     return {
       id: documentSnapshot.id,
       name: await this.encryptor.symmetric!.decrypt(data['name']),
-      registerCount: Number(await await this.encryptor.homomorphic!.decrypt(data['registerCount'])),
-      currentValue: Number(await await this.encryptor.homomorphic!.decrypt(data['currentValue'])),
+      registerCount: Number(await this.encryptor.homomorphic!.numberDecrypt(data['registerCount'])),
+      currentValue: Number(await this.encryptor.homomorphic!.numberDecrypt(data['currentValue']))/PRECISION,
       type: (await this.encryptor.symmetric!.decrypt(data['type'])) as "income"| "spending" | "income and spending",
+    }
   }
+
+  async cipherobjToAccount(object:any):Promise<Account>{
+    await this.ready.homomorfic
+    await this.ready.symmetric
+    return {
+      // id: documentSnapshot.id,
+      name: await this.encryptor.symmetric!.decrypt(object.name),
+      registerCount: Number(await this.encryptor.homomorphic!.numberDecrypt(object.registerCount)),
+      currentValue: Number(await this.encryptor.homomorphic!.numberDecrypt(object.currentValue))/PRECISION,
+      type: (await this.encryptor.symmetric!.decrypt(object.type)) as "income"| "spending" | "income and spending",
+    }
+
   }
 
   async transactionToCipherobj(transaction: Transaction): Promise<object>{
@@ -318,7 +333,7 @@ export class EncryptionService {
     await this.ready.symmetric
     return {
       title: await this.encryptor.symmetric!.encrypt(transaction.title),
-      amount: await this.encryptor.homomorphic!.encrypt(transaction.amount.toString()),
+      amount: await this.encryptor.homomorphic!.numberEncrypt(BigInt(transaction.amount*PRECISION)),
       timeOfTransaction: transaction.timeOfTransaction,
       description: await this.encryptor.symmetric!.encrypt(transaction.description)
     }
@@ -329,8 +344,8 @@ export class EncryptionService {
     await this.ready.symmetric
     return {
       name: await this.encryptor.symmetric!.encrypt(account.name),
-      registerCount: await this.encryptor.homomorphic!.encrypt(account.registerCount.toString()),
-      currentValue: await this.encryptor.homomorphic!.encrypt(account.currentValue.toString()),
+      registerCount: await this.encryptor.homomorphic!.numberEncrypt(BigInt(account.registerCount)),
+      currentValue: await this.encryptor.homomorphic!.numberEncrypt(BigInt(account.currentValue*PRECISION)),
       type: await this.encryptor.symmetric!.encrypt(account.type),
     }
   }
@@ -360,8 +375,8 @@ export class EncryptionService {
     } = {}
 
     if(nAccount.name) cipherobj.name =await this.encryptor.symmetric!.encrypt(nAccount.name)
-    if(nAccount.registerCount) cipherobj.registerCount = await this.encryptor.homomorphic!.encrypt(nAccount.registerCount.toString())
-    if(nAccount.currentValue) cipherobj.currentValue = await this.encryptor.homomorphic!.encrypt(nAccount.currentValue.toString())
+    if(nAccount.registerCount) cipherobj.registerCount = await this.encryptor.homomorphic!.numberEncrypt(BigInt(nAccount.registerCount))
+    if(nAccount.currentValue) cipherobj.currentValue = await this.encryptor.homomorphic!.numberEncrypt(BigInt(nAccount.currentValue*PRECISION))
     if(nAccount.type) cipherobj.type =await this.encryptor.symmetric!.encrypt(nAccount.type)
 
     return cipherobj
