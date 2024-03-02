@@ -22,6 +22,7 @@ loadSession(){
   if(user==null) return
   this.currentUser = JSON.parse(user)
   Globals.resolvers.userId(this.currentUser!.uid)
+  this.encSvc.restoreKeysWithSession()
 }
 
 
@@ -39,13 +40,14 @@ logWithPasswordAndEmail(email:string,password:string){
       this.currentUser = it.user
       Globals.resolvers.userId(it.user!.uid)
       this.storeSession()
-      this.encSvc.fetch(email,password)
+      this.encSvc.initializeFromLogin(email,password)
     })
     .catch( e => {reject(e)})
   })
 }
 
 registerWithPasswordAndEmail(email:string,password:string){
+  console.log("with register")
   // Returns a promise that is only fullfiled if the registrations was successful (User authenticated)
   return new Promise<firebase.default.User>((resolve,reject)=>{
     this.authFire.createUserWithEmailAndPassword(email,password)
@@ -55,7 +57,7 @@ registerWithPasswordAndEmail(email:string,password:string){
       this.currentUser = it.user
       Globals.resolvers.userId(it.user!.uid)
       this.storeSession()
-      this.encSvc.fetch(email,password)
+      this.encSvc.initializeFromRegister(email,password)
     })
     .catch( e => {reject(e)})
   })
