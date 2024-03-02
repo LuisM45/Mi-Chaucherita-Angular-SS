@@ -10,7 +10,7 @@ import { Account, NullableAccount } from '../interfaces/accout.interface';
 import { Transaction } from '../interfaces/transaction.interface';
 import { UserData } from '../interfaces/userdata.interface';
 
-const PRECISION = 1
+const PRECISION = 1000
 
 @Injectable({
   providedIn: 'root'
