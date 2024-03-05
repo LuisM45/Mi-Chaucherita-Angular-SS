@@ -289,7 +289,7 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
     const account = await accountP
 
     account.currentValue -= oldTransaction.amount
-    account.currentValue -= 1
+    account.registerCount -= 1
     await this.accountService.updatePartialAccount(accountId,{currentValue:account.currentValue,registerCount:account.registerCount})
 }
 
