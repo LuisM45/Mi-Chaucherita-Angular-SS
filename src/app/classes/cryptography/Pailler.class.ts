@@ -15,17 +15,32 @@ export class Pailler implements PartialHomomorphicAlgorithm{
 
         var complement2Plaintext = plaintext
         if (plaintext<0) complement2Plaintext = pk.n + plaintext
-        const ciphertext = pk.encrypt(complement2Plaintext,100n)
-        return bigintToString(ciphertext,"base64")
+
+        var ciphertext: undefined | bigint
+        var isDecryptable = false
+
+        while (!isDecryptable){
+            ciphertext = pk.encrypt(complement2Plaintext,100n)
+            var decipheredText = await this.numberDecryptBigint(ciphertext)
+            isDecryptable = decipheredText == plaintext
+        }
+        
+
+        return bigintToString(ciphertext!,"base64")
     }
     async numberDecrypt(ciphertext: string): Promise<bigint>{
-        const pr = (await this.keys).privateKey
         const ciphertextBigInt = stringToBigint(ciphertext,"base64")
-        const complement2Plaintext = (await this.keys).privateKey.decrypt(ciphertextBigInt)
+        return this.numberDecryptBigint(ciphertextBigInt)
+    }
+
+    private async numberDecryptBigint(ciphertext: bigint): Promise<bigint>{
+        const pr = (await this.keys).privateKey
+        const complement2Plaintext = (await this.keys).privateKey.decrypt(ciphertext)
         var plaintext = complement2Plaintext
         if(plaintext>=pr.n/2n) plaintext =  complement2Plaintext - pr.n
         return plaintext
     }
+
     async raw_encrypt(plainbytes: Uint8Array):Promise<Uint8Array>{
         return new Uint8Array()
     }
@@ -90,7 +105,7 @@ export class Pailler implements PartialHomomorphicAlgorithm{
         // Sometimes doesnt work IDK why
         console.error("HERE1")
         var bigm = stringToBigint(arg0,"utf8")
-        var bigc = (await this.keys).publicKey.encrypt(bigm,100n)
+        var bigc = (await this.keys).publicKey.encrypt(bigm)
         return bigintToString(bigc,"base64")
     };
 

@@ -390,10 +390,10 @@ export class EncryptionService {
       type?:string
     } = {}
 
-    if(nAccount.name) cipherobj.name =await this.encryptor.symmetric!.encrypt(nAccount.name)
-    if(nAccount.registerCount) cipherobj.registerCount = await this.encryptor.homomorphic!.numberEncrypt(BigInt(nAccount.registerCount))
-    if(nAccount.currentValue) cipherobj.currentValue = await this.encryptor.homomorphic!.numberEncrypt(BigInt(nAccount.currentValue*PRECISION))
-    if(nAccount.type) cipherobj.type =await this.encryptor.symmetric!.encrypt(nAccount.type)
+    if(nAccount.name != undefined) cipherobj.name =await this.encryptor.symmetric!.encrypt(nAccount.name)
+    if(nAccount.registerCount != undefined) cipherobj.registerCount = await this.encryptor.homomorphic!.numberEncrypt(BigInt(nAccount.registerCount))
+    if(nAccount.currentValue != undefined) cipherobj.currentValue = await this.encryptor.homomorphic!.numberEncrypt(BigInt(nAccount.currentValue*PRECISION))
+    if(nAccount.type != undefined) cipherobj.type =await this.encryptor.symmetric!.encrypt(nAccount.type)
 
     return cipherobj
   }
