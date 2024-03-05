@@ -123,6 +123,7 @@ export class EncryptionService {
 
   async createEmptyKeydoc():Promise<boolean>{
     await this.ready.keydocRef
+    console.log("creating empty doc")
     await setDoc(this.keydocRef!,{})
 
     return true
@@ -164,7 +165,6 @@ export class EncryptionService {
 
   async writeMasterKey():Promise<boolean>{
     await this.ready.master
-
     let cryptokey = await this.encryptor.master!.key
     let key = await window.crypto.subtle.exportKey("raw",cryptokey)
     let keyBase64 = Buffer.from(key).toString("base64")
@@ -194,10 +194,24 @@ export class EncryptionService {
   }
 
   async fetchKeys():Promise<boolean>{
-    this.fetchKeydoc()
     await this.ready.keydoc
-    if(!await this.fetchSymmetricKey()) return false // TODO: regenerate keys
-    if(!await this.fetchHomomorphicKey()) return false // TODO: regenerate keys
+
+    if (!this.keydoc!.exists()){
+      console.log("not exists")
+      this.generateKeys()
+      await this.uploadKeys()
+      return false
+    }
+    if(!await this.fetchSymmetricKey()){
+      this.generateSymmetricKey()
+      this.uploadSymmetricKey()
+      return false // TODO: regenerate keys
+    }
+    if(!await this.fetchHomomorphicKey()){
+      this.generateHomomorphicKey()
+      this.uploadHomomorphicKey()
+      return false // TODO: regenerate keys
+    }
     return true
   }
 
@@ -206,7 +220,9 @@ export class EncryptionService {
     await this.ready.keydoc
 
     let cryptkey = this.keydoc!.get("symmetric-key")
-    if(cryptkey==undefined) return false
+    if(cryptkey==undefined){
+      return false
+    }
 
     let cryptbytes = Buffer.from(cryptkey,"base64")
     let keyBytes = await this.encryptor.master!.raw_decrypt(cryptbytes)

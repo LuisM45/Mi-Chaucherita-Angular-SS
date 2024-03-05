@@ -65,8 +65,14 @@ async registerWithPasswordAndEmail(username:string,email:string,password:string)
 async fetchUserdata(){
   const docRef = doc(this.firestore,"userdata",this.currentUser!.uid)
   const docSnap = await getDoc(docRef)
-  const userdata = await this.encSvc.cipherdocToUserData(docSnap)
-  this.username = userdata.username
+  try{
+    const userdata = await this.encSvc.cipherdocToUserData(docSnap)
+    this.username = userdata.username
+  }
+  catch(e){
+    console.error(e)
+  }
+  
 }
 
 async uploadUserdata(){

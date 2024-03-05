@@ -50,11 +50,12 @@ export class AES256 implements SymmetricalEncyrptionAlgorithm{
 
     static async _getCryptoKey(password:string): Promise<CryptoKey>{
         
+        console.log("pass "+password)
         const key = await window.crypto.subtle.importKey(
             'raw',
             new TextEncoder().encode(password),
             'PBKDF2',
-            true,
+            false,
             ['deriveKey']
           );
       

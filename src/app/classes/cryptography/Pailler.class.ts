@@ -14,7 +14,7 @@ export class Pailler implements PartialHomomorphicAlgorithm{
         const pk = (await this.keys).publicKey
 
         var complement2Plaintext = plaintext
-        if (plaintext<0) complement2Plaintext = pk.n/2n - plaintext
+        if (plaintext<0) complement2Plaintext = pk.n + plaintext
         const ciphertext = pk.encrypt(complement2Plaintext,100n)
         return bigintToString(ciphertext,"base64")
     }
@@ -23,7 +23,7 @@ export class Pailler implements PartialHomomorphicAlgorithm{
         const ciphertextBigInt = stringToBigint(ciphertext,"base64")
         const complement2Plaintext = (await this.keys).privateKey.decrypt(ciphertextBigInt)
         var plaintext = complement2Plaintext
-        if(plaintext>=pr.n/2n) plaintext =  pr.n/2n - complement2Plaintext
+        if(plaintext>=pr.n/2n) plaintext =  complement2Plaintext - pr.n
         return plaintext
     }
     async raw_encrypt(plainbytes: Uint8Array):Promise<Uint8Array>{
