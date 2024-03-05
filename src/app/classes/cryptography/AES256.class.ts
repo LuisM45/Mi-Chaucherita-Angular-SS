@@ -3,6 +3,16 @@ import { EncyrptionAlgorithm } from "../../interfaces/cryptography/encryption_al
 import { PromiseHolder } from "../PromiseHolder.class";
 import { SymmetricalEncyrptionAlgorithm } from "src/app/interfaces/cryptography/symmetrical_encryption_algorithm.interface";
 
+function mergeArrays(a:Uint8Array,b:Uint8Array):Uint8Array{
+    let mergedArray = new Uint8Array(a.length + b.length);
+    mergedArray.set(a);
+    mergedArray.set(b, a.length);
+    return mergedArray
+}
+
+function splitArray(a:Uint8Array):[Uint8Array,Uint8Array]{
+    return [a.slice(0,16),a.slice(16,a.length)]
+}
 
 export class AES256 implements SymmetricalEncyrptionAlgorithm{
     private static algorithmName = "AES-CBC"
@@ -50,7 +60,6 @@ export class AES256 implements SymmetricalEncyrptionAlgorithm{
 
     static async _getCryptoKey(password:string): Promise<CryptoKey>{
         
-        console.log("pass "+password)
         const key = await window.crypto.subtle.importKey(
             'raw',
             new TextEncoder().encode(password),
@@ -86,24 +95,28 @@ export class AES256 implements SymmetricalEncyrptionAlgorithm{
     };
 
     async raw_encrypt(plainbytes: Uint8Array):Promise<Uint8Array>{
+        let _iv = window.crypto.getRandomValues(new Uint8Array(16))
+        
+
         var cryptBytes = await window.crypto.subtle.encrypt(
             {
                 name: AES256.algorithmName,
-                iv: new Uint8Array(16),
+                iv: _iv,
             },
             await this.key,
             plainbytes
         )
-        return new Uint8Array(cryptBytes)
+        return mergeArrays(_iv,new Uint8Array(cryptBytes))
     }
     async raw_decrypt(cipherbytes: Uint8Array):Promise<Uint8Array>{
+        let [_iv,_data] = splitArray(cipherbytes)
         var clearBytes = await window.crypto.subtle.decrypt(
             {
                 name: AES256.algorithmName,
-                iv: new ArrayBuffer(16),
+                iv: _iv
             },
             await this.key,
-            cipherbytes
+            _data
         )
         return new Uint8Array(clearBytes)
     }
