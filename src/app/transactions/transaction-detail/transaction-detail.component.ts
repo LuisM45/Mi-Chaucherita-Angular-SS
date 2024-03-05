@@ -69,7 +69,7 @@ export class TransactionDetailComponent {
       this.prepareNavigation()
     }
     ).catch(e=>
-      console.log(e)
+      console.error(e)
     )
     
   }

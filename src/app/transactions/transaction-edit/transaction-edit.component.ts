@@ -58,7 +58,7 @@ export class TransactionEditComponent implements OnInit{
       this.id,
       this.transaction
     ).then(a=>{this.router.navigate(['/','transaction','view',this.accountId,this.id])})
-    .catch(console.log)
+    .catch(console.error)
   }
 
 }

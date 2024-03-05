@@ -117,7 +117,6 @@ export function sanitizeTransaction(transaction:Transaction):Transaction{
 }
 
 export function sanitizeAccount(account:Account):Account{
-  console.log("update")
   var value:Account = {
     name: account.name,
     registerCount: account.registerCount,

@@ -86,7 +86,6 @@ export class DashboardComponent implements OnInit{
   
 
   logout() {
-    console.log("logout attempted")
     this.userService.logout()
     this.router.navigate(["login"])
   }

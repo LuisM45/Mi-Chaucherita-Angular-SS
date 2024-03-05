@@ -123,7 +123,6 @@ export class EncryptionService {
 
   async createEmptyKeydoc():Promise<boolean>{
     await this.ready.keydocRef
-    console.log("creating empty doc")
     await setDoc(this.keydocRef!,{})
 
     return true
@@ -197,7 +196,6 @@ export class EncryptionService {
     await this.ready.keydoc
 
     if (!this.keydoc!.exists()){
-      console.log("not exists")
       this.generateKeys()
       await this.uploadKeys()
       return false
