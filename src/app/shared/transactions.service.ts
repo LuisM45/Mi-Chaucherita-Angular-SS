@@ -272,8 +272,8 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
     setDoc(d,await this.encSvc.transactionToCipherobj(transaction))
     const account = await this.accountService.getAccount(accountId)
 
-    const delta = transaction.amount - oldTransaction.amount
-    account.currentValue += delta
+    const delta = transaction.amount.b - oldTransaction.amount.b
+    account.currentValue.b += delta
 
     this.accountService.updatePartialAccount(accountId!,{currentValue:account.currentValue})
 
@@ -289,8 +289,8 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
     deleteDoc(d)
     const account = await accountP
 
-    account.currentValue -= oldTransaction.amount
-    account.registerCount -= 1
+    account.currentValue.b -= oldTransaction.amount.b
+    account.registerCount -= 1n 
     await this.accountService.updatePartialAccount(accountId,{currentValue:account.currentValue,registerCount:account.registerCount})
 }
 
@@ -300,8 +300,8 @@ getPrevTransactionListPromise(firstSnapshot:DocumentSnapshot,queryConstraints:Qu
 
     // No borrar riesgo de Heisenbug
     const account = await accountP
-    account.registerCount += 1
-    account.currentValue += transaction.amount
+    account.registerCount += 1n
+    account.currentValue.b += transaction.amount.b
     
     const updateP = this.accountService.updatePartialAccount(accountId,{registerCount:account.registerCount,currentValue:account.currentValue})
     let docRef = addDoc(this.getConextColById(accountId),cryptObj)

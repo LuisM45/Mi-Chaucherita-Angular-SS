@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FixedPointDecimal } from 'src/app/classes/FixedPointDecimal.class';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
 import { TransactionsService } from 'src/app/shared/transactions.service';
 import { dateStringToDate, toLocalStringUpToMinute } from 'src/app/shared/utils';
@@ -25,9 +26,10 @@ export class RegisterTransactionComponent {
   }
 
   register(){
+    
     var transaction:Transaction = {
       title: this.title,
-      amount: this.amount,
+      amount: FixedPointDecimal.valueOf(this.amount.toString()),
       timeOfTransaction: dateStringToDate(this.datetime),
       description: this.description
     }

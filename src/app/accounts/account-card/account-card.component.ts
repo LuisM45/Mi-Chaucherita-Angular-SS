@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { FixedPointDecimal } from 'src/app/classes/FixedPointDecimal.class';
 import { Account } from 'src/app/interfaces/accout.interface';
 import { AccountService } from 'src/app/shared/account.service';
 import { TransactionsService } from 'src/app/shared/transactions.service';
@@ -14,8 +15,8 @@ export class AccountCardComponent implements OnInit{
   accountId: string = '';
   accountName?: string = '';
   accountType?: string = '';
-  accountBalance?: number = 0;
-  transactionCount?: number = 0;
+  accountBalance?: FixedPointDecimal = FixedPointDecimal.valueOf(0n);
+  transactionCount?: bigint = 0n;
   imageUrl: string = '';
   lastTransactionReason: string = '';
 

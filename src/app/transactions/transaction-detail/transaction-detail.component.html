@@ -37,7 +37,7 @@
         <div class="bg-white rounded-lg shadow-lg p-4 my-4">
             <ng-container *ngIf="transaction">
                 <p class="text-lg"><span class="text-primary font-bold">Título:</span> {{ transaction.title }}</p>
-                <p class="text-lg"><span class="text-primary font-bold">Monto:</span> {{ transaction.amount | currency
+                <p class="text-lg"><span class="text-primary font-bold">Monto:</span> {{ transaction.amount.toString()| currency
                     }}</p>
                 <p class="text-lg"><span class="text-primary font-bold">Fecha:</span> {{ transaction.timeOfTransaction
                     }}</p>

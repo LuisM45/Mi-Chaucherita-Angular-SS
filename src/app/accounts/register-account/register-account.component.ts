@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { FixedPointDecimal } from 'src/app/classes/FixedPointDecimal.class';
 import { Account } from 'src/app/interfaces/accout.interface';
 import { AccountService } from 'src/app/shared/account.service';
 
@@ -24,12 +25,15 @@ export class RegisterAccountComponent {
   }
 
   async register() {
-    
+    if(!this.accountName || !this.selectedType){
+      throw new Error("Missing parameters")
+    }
+
     const newAccount:Account = {
       name: this.accountName!!,
       type: this.selectedType!! as unknown as "income" | "spending" | "income and spending",
-      registerCount: 0,
-      currentValue: 0
+      registerCount: 0n,
+      currentValue: FixedPointDecimal.valueOf(0n)
     }
 
     const docId = await this.accountSvc.createAccount(newAccount)

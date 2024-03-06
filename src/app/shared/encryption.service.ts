@@ -9,8 +9,7 @@ import { Globals } from './global';
 import { Account, NullableAccount } from '../interfaces/accout.interface';
 import { Transaction } from '../interfaces/transaction.interface';
 import { UserData } from '../interfaces/userdata.interface';
-
-const PRECISION = 1000
+import { FixedPointDecimal } from '../classes/FixedPointDecimal.class';
 
 @Injectable({
   providedIn: 'root'
@@ -310,7 +309,7 @@ export class EncryptionService {
       account: ()=>documentSnapshot.ref,
       id: documentSnapshot.id,
       title: await this.encryptor.symmetric!.decrypt(data['title']),
-      amount: Number(await this.encryptor.homomorphic!.numberDecrypt(data['amount']))/PRECISION,
+      amount: FixedPointDecimal.valueOf(await this.encryptor.homomorphic!.numberDecrypt(data['amount'])),
       timeOfTransaction: (data!!['timeOfTransaction'] as Timestamp).toDate(),
       description: await this.encryptor.symmetric!.decrypt(data['description']),
     }
@@ -323,8 +322,8 @@ export class EncryptionService {
     return {
       id: documentSnapshot.id,
       name: await this.encryptor.symmetric!.decrypt(data['name']),
-      registerCount: Number(await this.encryptor.homomorphic!.numberDecrypt(data['registerCount'])),
-      currentValue: Number(await this.encryptor.homomorphic!.numberDecrypt(data['currentValue']))/PRECISION,
+      registerCount: await this.encryptor.homomorphic!.numberDecrypt(data['registerCount']),
+      currentValue: FixedPointDecimal.valueOf(await this.encryptor.homomorphic!.numberDecrypt(data['currentValue'])),
       type: (await this.encryptor.symmetric!.decrypt(data['type'])) as "income"| "spending" | "income and spending",
     }
   }
@@ -335,8 +334,8 @@ export class EncryptionService {
     return {
       // id: documentSnapshot.id,
       name: await this.encryptor.symmetric!.decrypt(object.name),
-      registerCount: Number(await this.encryptor.homomorphic!.numberDecrypt(object.registerCount)),
-      currentValue: Number(await this.encryptor.homomorphic!.numberDecrypt(object.currentValue))/PRECISION,
+      registerCount: await this.encryptor.homomorphic!.numberDecrypt(object.registerCount),
+      currentValue: FixedPointDecimal.valueOf(await this.encryptor.homomorphic!.numberDecrypt(object.currentValue)),
       type: (await this.encryptor.symmetric!.decrypt(object.type)) as "income"| "spending" | "income and spending",
     }
 
@@ -347,7 +346,7 @@ export class EncryptionService {
     await this.ready.symmetric
     return {
       title: await this.encryptor.symmetric!.encrypt(transaction.title),
-      amount: await this.encryptor.homomorphic!.numberEncrypt(BigInt(transaction.amount*PRECISION)),
+      amount: await this.encryptor.homomorphic!.numberEncrypt(transaction.amount.b),
       timeOfTransaction: transaction.timeOfTransaction,
       description: await this.encryptor.symmetric!.encrypt(transaction.description)
     }
@@ -358,8 +357,8 @@ export class EncryptionService {
     await this.ready.symmetric
     return {
       name: await this.encryptor.symmetric!.encrypt(account.name),
-      registerCount: await this.encryptor.homomorphic!.numberEncrypt(BigInt(account.registerCount)),
-      currentValue: await this.encryptor.homomorphic!.numberEncrypt(BigInt(account.currentValue*PRECISION)),
+      registerCount: await this.encryptor.homomorphic!.numberEncrypt(account.registerCount),
+      currentValue: await this.encryptor.homomorphic!.numberEncrypt(account.currentValue.b),
       type: await this.encryptor.symmetric!.encrypt(account.type),
     }
   }
@@ -389,8 +388,8 @@ export class EncryptionService {
     } = {}
 
     if(nAccount.name != undefined) cipherobj.name =await this.encryptor.symmetric!.encrypt(nAccount.name)
-    if(nAccount.registerCount != undefined) cipherobj.registerCount = await this.encryptor.homomorphic!.numberEncrypt(BigInt(nAccount.registerCount))
-    if(nAccount.currentValue != undefined) cipherobj.currentValue = await this.encryptor.homomorphic!.numberEncrypt(BigInt(nAccount.currentValue*PRECISION))
+    if(nAccount.registerCount != undefined) cipherobj.registerCount = await this.encryptor.homomorphic!.numberEncrypt(nAccount.registerCount)
+    if(nAccount.currentValue != undefined) cipherobj.currentValue = await this.encryptor.homomorphic!.numberEncrypt(nAccount.currentValue.b)
     if(nAccount.type != undefined) cipherobj.type =await this.encryptor.symmetric!.encrypt(nAccount.type)
 
     return cipherobj
