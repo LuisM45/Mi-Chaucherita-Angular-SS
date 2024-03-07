@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FixedPointDecimal } from 'src/app/classes/FixedPointDecimal.class';
+import { Account } from 'src/app/interfaces/accout.interface';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
+import { AccountService } from 'src/app/shared/account.service';
 import { TransactionsService } from 'src/app/shared/transactions.service';
 import { dateStringToDate, toLocalStringUpToMinute } from 'src/app/shared/utils';
 
@@ -12,21 +14,30 @@ import { dateStringToDate, toLocalStringUpToMinute } from 'src/app/shared/utils'
 })
 export class RegisterTransactionComponent {
   accountId?: string
+  account?: Promise<Account>
   title: string = ""
   amount: number = 0
   datetime: string = toLocalStringUpToMinute(new Date())
   description: string = ""
 
   constructor(
+    public accountService: AccountService,
     public transactionService: TransactionsService,
     public router:Router,
     public activatedRoute:ActivatedRoute
   ){
-    activatedRoute.paramMap.subscribe( pm=> {this.accountId = pm.get("accountId")!!})
+    activatedRoute.paramMap.subscribe( pm=> {
+      this.accountId = pm.get("accountId")!!
+      this.account = accountService.getAccount(this.accountId!)
+    })
   }
 
-  register(){
-    
+  async register(){
+    const account = await this.account
+    if(account?.type != "income and spending"){
+      throw new Error("Negative values only allowed for 'income and spending' accounts only")
+    }
+
     var transaction:Transaction = {
       title: this.title,
       amount: FixedPointDecimal.valueOf(this.amount.toString()),
