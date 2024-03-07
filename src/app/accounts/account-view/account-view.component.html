@@ -27,7 +27,7 @@
         </button>
       </div>
       <div>
-        <button routerLink="/transaction/register/{{ accountId }}" class="button">
+        <button *ngIf="accountId" routerLink="/transaction/register/{{ accountId }}" class="button">
           Nuevo movimiento
         </button>
       </div>

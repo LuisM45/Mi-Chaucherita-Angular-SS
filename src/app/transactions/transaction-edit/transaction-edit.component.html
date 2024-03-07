@@ -35,7 +35,9 @@
             placeholder="Ingrese la descripción"
             class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary"></textarea>
         </div>
-
+        <div class="text-red-500 text-xs" *ngIf="!isValueValid">
+          Este tipo de cuenta no admite valores negativos
+        </div>
         <div class="flex flex-row w-full justify-between px-20">
           <button class="button2" [routerLink]='["/","account-view",accountId]'>Cancelar</button>
 

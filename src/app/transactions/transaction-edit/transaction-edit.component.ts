@@ -22,6 +22,7 @@ export class TransactionEditComponent implements OnInit{
   datetime: string = toLocalStringUpToMinute(new Date())
   description: string = ""
 
+  isValueValid = true
 
   ngOnInit(): void {
     this.activatedRoute.paramMap.subscribe(pm=>{
@@ -53,8 +54,12 @@ export class TransactionEditComponent implements OnInit{
   async update(){
     const account = await this.account
     if(this.amount<0 && account?.type != "income and spending"){
+      this.isValueValid = false
       throw new Error("Negative values only allowed for 'income and spending' accounts only")
     }
+    this.isValueValid = true
+
+    return
 
     const transaction:Transaction = {
       id: this.id,

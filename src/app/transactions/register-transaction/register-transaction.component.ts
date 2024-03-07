@@ -20,6 +20,8 @@ export class RegisterTransactionComponent {
   datetime: string = toLocalStringUpToMinute(new Date())
   description: string = ""
 
+  isValueValid = true
+
   constructor(
     public accountService: AccountService,
     public transactionService: TransactionsService,
@@ -32,11 +34,16 @@ export class RegisterTransactionComponent {
     })
   }
 
+
   async register(){
     const account = await this.account
     if(this.amount<0 && account?.type != "income and spending"){
+      this.isValueValid = false
       throw new Error("Negative values only allowed for 'income and spending' accounts only")
     }
+    this.isValueValid = true
+
+    return
 
     var transaction:Transaction = {
       title: this.title,
