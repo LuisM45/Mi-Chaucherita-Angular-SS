@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FixedPointDecimal } from 'src/app/classes/FixedPointDecimal.class';
+import { Account } from 'src/app/interfaces/accout.interface';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
+import { AccountService } from 'src/app/shared/account.service';
 import { TransactionsService } from 'src/app/shared/transactions.service';
 import { dateStringToDate, toLocalStringUpToMinute } from 'src/app/shared/utils';
 
@@ -11,7 +13,7 @@ import { dateStringToDate, toLocalStringUpToMinute } from 'src/app/shared/utils'
   styleUrls: ['./transaction-edit.component.scss']
 })
 export class TransactionEditComponent implements OnInit{
-
+  account?: Promise<Account>
   
   id: string = ""
   accountId: string = ""
@@ -25,6 +27,7 @@ export class TransactionEditComponent implements OnInit{
     this.activatedRoute.paramMap.subscribe(pm=>{
       this.id = pm.get("id")!!
       this.accountId = pm.get("accountId")!!
+      this.account = this.accountService.getAccount(this.accountId!)
       
     this.transactionService.getTransactionOnly(this.accountId,this.id)
         .then(t=>{
@@ -39,12 +42,20 @@ export class TransactionEditComponent implements OnInit{
   
 
   constructor(
+    public accountService: AccountService,
     public transactionService: TransactionsService,
     public router:Router,
     public activatedRoute: ActivatedRoute
   ){  }
+    
 
-  update(){
+
+  async update(){
+    const account = await this.account
+    if(account?.type != "income and spending"){
+      throw new Error("Negative values only allowed for 'income and spending' accounts only")
+    }
+
     const transaction:Transaction = {
       id: this.id,
       title: this.title,
