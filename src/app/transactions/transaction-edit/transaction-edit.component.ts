@@ -52,7 +52,7 @@ export class TransactionEditComponent implements OnInit{
 
   async update(){
     const account = await this.account
-    if(account?.type != "income and spending"){
+    if(this.amount<0 && account?.type != "income and spending"){
       throw new Error("Negative values only allowed for 'income and spending' accounts only")
     }
 
