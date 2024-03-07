@@ -29,10 +29,8 @@ export class FixedPointDecimal{
         var [intPartStr,decPartStr] = s.split(".",2)
         if(decPartStr)
             decPartStr = decPartStr.padEnd(Number(PRECISION),"0").substring(0,Number(PRECISION))
-        console.log([intPartStr,decPartStr])
         var intPart = BigInt(intPartStr)*DIVISOR*sign
         var decPart = decPartStr ? BigInt(decPartStr)*sign : 0n
-        console.log([intPart,decPart])
         return this.valueOfBigint(intPart + decPart)
     }
 
@@ -41,7 +39,6 @@ export class FixedPointDecimal{
     }
 
     public static toString(_bigint:bigint){
-        console.log(_bigint)
         var sign = BigInt(Math.sign(Number(_bigint)))
         _bigint *= sign
         const intPart = _bigint/(DIVISOR)
