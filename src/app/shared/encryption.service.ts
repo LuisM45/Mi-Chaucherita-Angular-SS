@@ -306,7 +306,6 @@ export class EncryptionService {
     const data = documentSnapshot.data()!
 
     return {
-      account: ()=>documentSnapshot.ref,
       id: documentSnapshot.id,
       title: await this.encryptor.symmetric!.decrypt(data['title']),
       amount: FixedPointDecimal.valueOf(await this.encryptor.homomorphic!.numberDecrypt(data['amount'])),

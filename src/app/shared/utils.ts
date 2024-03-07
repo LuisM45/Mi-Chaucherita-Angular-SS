@@ -66,7 +66,6 @@ export function parseDocToTransaction(documentSnapshot:DocumentSnapshot):Transac
   const data = documentSnapshot.data()
   var value:Transaction = data as Transaction
   value.id = documentSnapshot.id
-  value.account = ()=>documentSnapshot.ref
   value.timeOfTransaction = (data!!['timeOfTransaction'] as Timestamp).toDate()
   return value
 }

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { QueryConstraint, where } from 'firebase/firestore';
 import { Observable } from 'rxjs';
 import { PromiseHolder } from 'src/app/classes/PromiseHolder.class';
+import { Account } from 'src/app/interfaces/accout.interface';
 import { PagedQuery } from 'src/app/interfaces/query.interface';
 import { Transaction } from 'src/app/interfaces/transaction.interface';
 import { AccountService } from 'src/app/shared/account.service';
@@ -23,6 +24,7 @@ export class TransactionTableInnerComponent implements OnInit{
   }
 
   @Input() accountId: string = ""
+  account: Account | undefined
 
   queryConstraints:QueryConstraint[] = []
   response: Transaction[] = []
@@ -32,8 +34,11 @@ export class TransactionTableInnerComponent implements OnInit{
     private cache: CacheService,
     private router: Router
   ){}
-  ngOnInit(): void {
-    if(this.accountId){this.fetchIdOnly()}
+  async ngOnInit(): Promise<void> {
+    if(this.accountId){
+      this.account = await this.accountServiec.getAccount(this.accountId)
+      this.fetchIdOnly()
+    }
     else{this.fetchAll()}
   }
 
@@ -48,10 +53,8 @@ export class TransactionTableInnerComponent implements OnInit{
     await Promise.all(transactions)
   }
 
-  fetchIdOnly(){
-    this.transactionService.getTransactionList1(this.accountId,[]).then(tl=>{
-      this.response = tl.results
-    }).catch(_=>_)
+  async fetchIdOnly(){
+    this.response = await this.transactionService.getAllTransactionsOfAccount(this.account!)
   }
 
   touchDescription() {
@@ -76,7 +79,7 @@ export class TransactionTableInnerComponent implements OnInit{
 
   viewTransaction(transaction:Transaction){
     this.cache.set(transaction.id!,transaction)
-    this.router.navigate(['/','transaction','view',this.accountId,transaction.id!])
+    this.router.navigate(['/','transaction','view',transaction.account!.id!,transaction.id!])
   }
 
   navigatePrevious() {

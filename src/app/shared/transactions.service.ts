@@ -148,11 +148,36 @@ private async lambdaPrevTransaction(snapshot:DocumentSnapshot,queryConstraints:Q
 }
 
 async getAllAccountsTransactionsList():Promise<Promise<Transaction[]>[]>{
-  const accountsIds = (await this.accountService.getAllAccountsIds())
-  return accountsIds.map(a=>this.getAllTransactionsOfAccount(a))
+  const accountsPs = (await this.accountService.getAllAccounts())
+
+  const tranactionsPs:Promise<Transaction[]>[] = []
+  const waiter:Promise<any>[] = []
+  accountsPs.forEach(async aP=>{
+    waiter.push(aP)
+    const transactions = this.getAllTransactionsOfAccount(await aP)
+    tranactionsPs.push(transactions)
+  })
+
+  await Promise.all(waiter)
+
+  return tranactionsPs
 }
 
-async getAllTransactionsOfAccount(accountId:string):Promise<Transaction[]>{
+async getAllTransactionsOfAccount(account:Account):Promise<Transaction[]>{
+  const col = this.getConextColById(account.id!)
+  const docs = await getDocs(col)
+
+  const transactionsPromises:Promise<Transaction>[] = []
+  docs.forEach((d)=>{
+    var transactionP = this.encSvc.cipherdocToTransaction(d)
+    transactionP = transactionP.then(t=>{t.account = account;return t})
+    transactionsPromises.push(transactionP)
+  })
+
+  return (await Promise.all(transactionsPromises))
+}
+
+async getAllTransactionsOfAccountId(accountId:string):Promise<Transaction[]>{
   const col = this.getConextColById(accountId)
   const docs = await getDocs(col)
 
