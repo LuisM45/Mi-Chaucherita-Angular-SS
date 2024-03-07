@@ -59,8 +59,6 @@ export class TransactionEditComponent implements OnInit{
     }
     this.isValueValid = true
 
-    return
-
     const transaction:Transaction = {
       id: this.id,
       title: this.title,

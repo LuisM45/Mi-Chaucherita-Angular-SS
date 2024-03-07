@@ -43,7 +43,6 @@ export class RegisterTransactionComponent {
     }
     this.isValueValid = true
 
-    return
 
     var transaction:Transaction = {
       title: this.title,
